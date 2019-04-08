@@ -14,8 +14,8 @@ git clone git@github.com:gig-tech/terraform-provider-ovc.git $GOPATH/src/github.
 go get -v -u github.com/hashicorp/terraform/terraform
 go get -v -u github.com/gig-tech/ovc-sdk-go/ovc
 cd $GOPATH/src/github.com/terraform-providers/terraform-provider-ovc
-go build -o terraform-provider-ovc .
-mv terraform-provider-ovc ~/.terraform.d/plugins
+go build -o terraform-provider-ovc_v1.0.0 .
+mv terraform-provider-ovc_v1.0.0 ~/.terraform.d/plugins
 ```
 
 Put the binary in your plugins folder of terraform. For more information:

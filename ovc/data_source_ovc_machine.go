@@ -4,7 +4,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/nuberabe/ovc-sdk-go/ovc"
+	"github.com/gig-tech/ovc-sdk-go/ovc"
 )
 
 func dataSourceOvcMachine() *schema.Resource {
@@ -154,7 +154,6 @@ func dataSourceOvcMachineRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("os_image", machine.OsImage)
 	d.Set("storage", machine.Storage)
 	d.Set("locked", machine.Locked)
-	d.Set("userdata", machine.Userdata)
 	interfaces := make([]map[string]interface{}, len(machine.Interfaces))
 	for i := range machine.Interfaces {
 		machineInterface := make(map[string]interface{})

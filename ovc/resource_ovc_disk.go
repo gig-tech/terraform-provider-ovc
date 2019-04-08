@@ -1,0 +1,109 @@
+package ovc
+
+import (
+	"strconv"
+
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/nuberabe/ovc-sdk-go/ovc"
+)
+
+func resourceOvcDisk() *schema.Resource {
+	return &schema.Resource{
+		Create: resourceOvcDiskCreate,
+		Read:   resourceOvcDiskRead,
+		Update: resourceOvcDiskUpdate,
+		Delete: resourceOvcDiskDelete,
+		Exists: resourceOvcDiskExists,
+
+		Schema: map[string]*schema.Schema{
+			"machine_id": {
+				Type:     schema.TypeInt,
+				Required: true,
+			},
+			"disk_name": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"description": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"size": {
+				Type:     schema.TypeInt,
+				Required: true,
+			},
+			"type": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"ssd_size": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"iops": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+		},
+	}
+}
+
+func resourceOvcDiskExists(d *schema.ResourceData, m interface{}) (bool, error) {
+	client := m.(*ovc.OvcClient)
+	disk, err := client.Disks.Get(d.Id())
+	if err != nil || disk.Status == "DESTROYED" {
+		return false, nil
+	}
+	return true, nil
+}
+
+func resourceOvcDiskRead(d *schema.ResourceData, m interface{}) error {
+	client := m.(*ovc.OvcClient)
+	diskID := d.Id()
+	_, err := client.Disks.Get(diskID)
+	if err != nil {
+		d.SetId("")
+		return nil
+	}
+	return nil
+}
+
+func resourceOvcDiskCreate(d *schema.ResourceData, m interface{}) error {
+	client := m.(*ovc.OvcClient)
+	diskConfig := ovc.DiskConfig{}
+	diskConfig.MachineID = d.Get("machine_id").(int)
+	diskConfig.DiskName = d.Get("disk_name").(string)
+	diskConfig.Description = d.Get("description").(string)
+	diskConfig.Size = d.Get("size").(int)
+	diskConfig.Type = d.Get("type").(string)
+	diskConfig.SSDSize = d.Get("ssd_size").(int)
+	diskConfig.IOPS = d.Get("iops").(int)
+	diskID, err := client.Disks.CreateAndAttach(&diskConfig)
+	if err != nil {
+		return err
+	}
+	d.SetId(diskID)
+	return resourceOvcDiskRead(d, m)
+
+}
+
+func resourceOvcDiskUpdate(d *schema.ResourceData, m interface{}) error {
+	return resourceOvcDiskRead(d, m)
+}
+
+func resourceOvcDiskDelete(d *schema.ResourceData, m interface{}) error {
+	client := m.(*ovc.OvcClient)
+	diskConfig := ovc.DiskDeleteConfig{}
+	diskID, err := strconv.Atoi(d.Id())
+	diskConfig.DiskID = diskID
+	if err != nil {
+		return err
+	}
+	diskConfig.Detach = true
+	diskConfig.Permanently = true
+	err = client.Disks.Delete(&diskConfig)
+	if err != nil {
+		return err
+	}
+	return nil
+}

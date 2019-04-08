@@ -1,0 +1,7 @@
+.idea/
+.terraform/
+crash.log
+terraform.tfstate*
+.vscode
+terraform-provider-ovc
+*.svg

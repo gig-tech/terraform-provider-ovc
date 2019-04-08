@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/nuberabe/ovc-sdk-go/ovc"
+	"github.com/gig-tech/ovc-sdk-go/ovc"
 )
 
 func resourceOvcMachine() *schema.Resource {
@@ -155,7 +155,6 @@ func resourceOvcMachineRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("size_id", machineInfo.Sizeid)
 	d.Set("vcpus", machineInfo.Vcpus)
 	d.Set("disks", flattenDisks(machineInfo))
-	d.Set("userdata", machineInfo.Userdata)
 
 	return nil
 }

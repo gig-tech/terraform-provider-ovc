@@ -2,7 +2,7 @@ package ovc
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/nuberabe/ovc-sdk-go/ovc"
+	"github.com/gig-tech/ovc-sdk-go/ovc"
 )
 
 // Provider method to define all user inputs

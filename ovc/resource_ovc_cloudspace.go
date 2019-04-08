@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/nuberabe/ovc-sdk-go/ovc"
+	"github.com/gig-tech/ovc-sdk-go/ovc"
 )
 
 func resourceOvcCloudSpace() *schema.Resource {

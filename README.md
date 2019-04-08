@@ -10,9 +10,9 @@ To build, make sure the project is in your GOPATH and run the following command:
 ```
 mkdir -p ~/.terraform.d/plugins
 mkdir -p $GOPATH/src/github.com/terraform-providers/terraform-provider-ovc
-git clone git@git.gig.tech:nubera/terraform-provider-ovc.git $GOPATH/src/github.com/terraform-providers/terraform-provider-ovc
+git clone git@github.com:gig-tech/terraform-provider-ovc.git $GOPATH/src/github.com/terraform-providers/terraform-provider-ovc
 go get -v -u github.com/hashicorp/terraform/terraform
-go get -v -u github.com/nuberabe/ovc-sdk-go/ovc
+go get -v -u github.com/gig-tech/ovc-sdk-go/ovc
 cd $GOPATH/src/github.com/terraform-providers/terraform-provider-ovc
 go build -o terraform-provider-ovc .
 mv terraform-provider-ovc ~/.terraform.d/plugins

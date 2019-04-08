@@ -1,0 +1,32 @@
+language: go
+
+go:
+  - "1.10"
+
+env:
+  - REPO_NAME: github.com/terraform-providers/terraform-provider-ovc
+
+before_script:
+  - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)
+  - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
+  - cd $GOPATH/src/$REPO_NAME
+  - ls
+  - pwd
+  - go get -d ./...
+
+jobs:
+  include:
+    - stage: test
+      script:
+        - go fmt $(go list ./... | grep -v /vendor/)
+        - go vet $(go list ./... | grep -v /vendor/)
+        - go test -race $(go list ./... | grep -v /vendor/)
+    - stage: build
+      script:
+        - env GOOS=linux GOARCH=amd64 go build -o terraform-provider-ovc-linux .
+        - env GOOS=darwin GOARCH=amd64 go build -o terraform-provider-ovc-mac .
+
+
+#branches:
+#  only:
+#- master

@@ -1,7 +1,7 @@
 image: golang:1.10
 
 variables:
-  REPO_NAME: github.com/terraform-providers/terraform-provider-ovc
+  REPO_NAME: github.com/gig-tech/terraform-provider-ovc
 
 before_script:
   - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)

@@ -25,9 +25,24 @@ jobs:
         - go fmt $(go list ./... | grep -v /vendor/)
         - go vet $(go list ./... | grep -v /vendor/)
         - go test -race $(go list ./... | grep -v /vendor/)
-      if: branch = master
+      on:
+        branch: "master"
+        tags: true
     - stage: build
       script:
-        - env GOOS=linux GOARCH=amd64 go build -o terraform-provider-ovc-linux .
-        - env GOOS=darwin GOARCH=amd64 go build -o terraform-provider-ovc-mac .
-      if: branch = master
+        - env GOOS=linux GOARCH=amd64 go build -o terraform-provider-ovc_$(git describe --exact-match --tags HEAD 2>/dev/null || echo "")-linux .
+        - env GOOS=darwin GOARCH=amd64 go build -o terraform-provider-ovc_$(git describe --exact-match --tags HEAD 2>/dev/null || echo "")-mac .
+      on:
+        branch: "master"
+        tags: true
+
+deploy:
+  provider: releases
+  api_key: 
+    secure: "GDcmzmprDpmMMGP4G1UgWEdYCgjosGvC5hHfuPSYhuONsnnIRzUpa8ivbfS0aE4bPRbtmlbubJG+q447ofFpLzBz7gKM/CaxYqzixtV70vQeGuFXqjWxDiH+Od04ZU9oTEa8Wgld+BSmRWsASwybX50cwYeosF9mb6PLa0fqmTjktOvapc7LzKJmNtHrA0N64qzrv+angbUJeA0J6yQSRmDisw8xSTs/f14YIc0EuwlbWexqvfDZeHIipVuBZgcwkJ4sER1sAiEFPdkNqLqU1aAHMuo8plLz/Im6eEEfPqIdXzehkBZ54Fr35i6iGTEcjxepMUvisv3XcUO0J/itZDgELV9fJ/WClySlJFIyPJQltN+WI1JxKZDdeF8931+UhOs7mdSGKT0hM0ZMnR0MokARGZt/EtgAOBZgXVvVCNPO4ncKPO6+woqiSJ+TR8qhDE4Ap6NXblT8nspaUXbexNmINeI2Kxm33zftdz5VWAfUYPD6BhLcAliPSKy7MbWOT0GMf3l3TdgJ5bFb5Mqmo43mLtjNL9L/y8aTmMSAWXiLlMmlVZWKHFs1OEwVKYnacF63a6sPly9gSzMPDB1DFT3C2zXlW+B2R1Ub5QQwsnzrY+hStema2DWoDbEjwq4Vw7yPkJZqTIFQ/h/6w56bcFh69HSg3PX0a0IV1hT4bi4="
+  file:
+    - terraform-provider-ovc_$(git describe --tags --abbrev=0)-linux
+    - terraform-provider-ovc_$(git describe --tags --abbrev=0)-mac
+  skip_cleanup: true
+  on:
+    tags: true

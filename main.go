@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/gig-tech/terraform-provider-ovc/ovc"
 	"github.com/hashicorp/terraform/plugin"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/terraform-providers/terraform-provider-ovc/ovc"
 )
 
 func main() {

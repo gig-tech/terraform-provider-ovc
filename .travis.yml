@@ -31,7 +31,3 @@ jobs:
         - env GOOS=linux GOARCH=amd64 go build -o terraform-provider-ovc-linux .
         - env GOOS=darwin GOARCH=amd64 go build -o terraform-provider-ovc-mac .
       if: branch = master
-
-branches:
-  only:
-    - master

@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/gig-tech/terraform-provider-ovc.svg?branch=master)](https://travis-ci.org/gig-tech/terraform-provider-ovc)
+
 # OpenvCloud Provider
 
 The OpenvCloud provider is used for interacting with the cloud platform in order to create the desired resources. The provider needs to be configured with credentials.

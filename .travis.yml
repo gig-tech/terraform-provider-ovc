@@ -14,6 +14,10 @@ before_install:
   - pwd
   - go get -d ./...
 
+stages:
+  - test
+  - build
+
 jobs:
   include:
     - stage: test
@@ -21,12 +25,13 @@ jobs:
         - go fmt $(go list ./... | grep -v /vendor/)
         - go vet $(go list ./... | grep -v /vendor/)
         - go test -race $(go list ./... | grep -v /vendor/)
+      if: branch = master
     - stage: build
       script:
         - env GOOS=linux GOARCH=amd64 go build -o terraform-provider-ovc-linux .
         - env GOOS=darwin GOARCH=amd64 go build -o terraform-provider-ovc-mac .
+      if: branch = master
 
-
-#branches:
-#  only:
-#- master
+branches:
+  only:
+    - master

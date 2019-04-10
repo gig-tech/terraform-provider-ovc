@@ -3,8 +3,8 @@ package ovc
 import (
 	"log"
 
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/gig-tech/ovc-sdk-go/ovc"
+	"github.com/hashicorp/terraform/helper/schema"
 )
 
 func resourceOvcMachine() *schema.Resource {
@@ -35,16 +35,19 @@ func resourceOvcMachine() *schema.Resource {
 				Type:          schema.TypeInt,
 				Optional:      true,
 				ConflictsWith: []string{"memory", "vcpus"},
+				Computed:      true,
 			},
 			"memory": {
 				Type:          schema.TypeInt,
 				Optional:      true,
 				ConflictsWith: []string{"size_id"},
+				Computed:      true,
 			},
 			"vcpus": {
 				Type:          schema.TypeInt,
 				Optional:      true,
 				ConflictsWith: []string{"size_id"},
+				Computed:      true,
 			},
 			"image_id": {
 				Type:     schema.TypeInt,

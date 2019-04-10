@@ -5,9 +5,9 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/gig-tech/ovc-sdk-go/ovc"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/gig-tech/ovc-sdk-go/ovc"
 )
 
 func resourceOvcCloudSpace() *schema.Resource {
@@ -61,22 +61,27 @@ func resourceOvcCloudSpace() *schema.Resource {
 						"max_memory_capacity": {
 							Type:     schema.TypeFloat,
 							Optional: true,
+							Default:  -1.0,
 						},
 						"max_disk_capacity": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Default:  -1,
 						},
 						"max_cpu_capacity": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Default:  -1,
 						},
 						"max_network_peer_transfer": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Default:  -1,
 						},
 						"max_num_public_ip": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Default:  -1,
 						},
 					},
 				},

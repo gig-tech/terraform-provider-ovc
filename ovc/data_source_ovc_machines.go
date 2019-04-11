@@ -61,7 +61,7 @@ func dataSourceOvcMachines() *schema.Resource {
 }
 
 func dataSourceOvcMachinesRead(d *schema.ResourceData, m interface{}) error {
-	c := m.(*ovc.OvcClient)
+	c := m.(*ovc.Client)
 	cloudspaceID := d.Get("cloudspace_id")
 	cid, err := strconv.Atoi(cloudspaceID.(string))
 	if err != nil {

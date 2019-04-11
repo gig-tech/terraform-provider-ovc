@@ -56,7 +56,7 @@ func resourcePortForwarding() *schema.Resource {
 }
 
 func resourcePortForwardingExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	publicPort := d.Get("public_port").(int)
 	cloudspaceID := d.Get("cloudspace_id").(int)
 	machineID := d.Get("machine_id").(int)
@@ -73,7 +73,7 @@ func resourcePortForwardingExists(d *schema.ResourceData, m interface{}) (bool, 
 }
 
 func resourcePortForwardingRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	portForwardingConfig := ovc.PortForwardingConfig{}
 	portForwardingConfig.CloudspaceID = d.Get("cloudspace_id").(int)
 	portForwardingConfig.MachineID = d.Get("machine_id").(int)
@@ -91,7 +91,7 @@ func resourcePortForwardingRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourcePortForwardingCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	portForwardingConfig := ovc.PortForwardingConfig{}
 	portForwardingConfig.CloudspaceID = d.Get("cloudspace_id").(int)
 	portForwardingConfig.PublicIP = d.Get("public_ip").(string)
@@ -109,7 +109,7 @@ func resourcePortForwardingCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourcePortForwardingUpdate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	portForwardingConfig := ovc.PortForwardingConfig{}
 	portForwardingConfig.CloudspaceID = d.Get("cloudspace_id").(int)
 	needForUpdate := false
@@ -156,7 +156,7 @@ func resourcePortForwardingUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourcePortForwardingDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	portForwardingConfig := ovc.PortForwardingConfig{}
 	portForwardingConfig.CloudspaceID = d.Get("cloudspace_id").(int)
 	portForwardingConfig.PublicIP = d.Get("public_ip").(string)

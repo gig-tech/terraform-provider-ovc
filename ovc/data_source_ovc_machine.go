@@ -125,7 +125,7 @@ func dataSourceOvcMachine() *schema.Resource {
 }
 
 func dataSourceOvcMachineRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	var machine *ovc.MachineInfo
 	var err error
 	if v, ok := d.GetOk("machine_id"); ok {

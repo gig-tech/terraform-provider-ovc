@@ -83,7 +83,7 @@ func dataSourceOvcCloudSpace() *schema.Resource {
 }
 
 func dataSourceOvcCloudSpaceRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	var cloudSpace *ovc.CloudSpace
 	var err error
 	if v, ok := d.GetOk("cloudspace_id"); ok {

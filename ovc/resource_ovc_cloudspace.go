@@ -91,7 +91,7 @@ func resourceOvcCloudSpace() *schema.Resource {
 }
 
 func resourceOvcCloudspaceExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	cloudspace, err := client.CloudSpaces.Get(d.Id())
 	if err != nil || cloudspace.Status == "DESTROYED" {
 		return false, nil
@@ -100,7 +100,7 @@ func resourceOvcCloudspaceExists(d *schema.ResourceData, m interface{}) (bool, e
 }
 
 func resourceOvcCloudSpaceRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	cloudSpaceID := d.Id()
 	cloudSpace, err := client.CloudSpaces.Get(cloudSpaceID)
 	if err != nil {
@@ -127,7 +127,7 @@ func resourceOvcCloudSpaceRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceOvcCloudSpaceCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	account := d.Get("account").(string)
 	accountID, err := client.Accounts.GetIDByName(account)
 	if err != nil {
@@ -201,7 +201,7 @@ func resourceOvcCloudSpaceCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceOvcCloudSpaceUpdate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	if d.HasChange("resource_limits") {
 		cloudSpaceID, _ := strconv.Atoi(d.Id())
 		cloudSpaceConfig := ovc.CloudSpaceConfig{
@@ -262,7 +262,7 @@ func resourceOvcCloudSpaceUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceOvcCloudSpaceDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	cloudSpaceConfig := ovc.CloudSpaceDeleteConfig{}
 	cloudSpaceID, err := strconv.Atoi(d.Id())
 	cloudSpaceConfig.CloudSpaceID = cloudSpaceID

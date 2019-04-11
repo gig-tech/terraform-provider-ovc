@@ -42,7 +42,7 @@ func dataSourceOvcSizes() *schema.Resource {
 }
 
 func dataSourceOvcSizesRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	sid, err := client.Sizes.GetByVcpusAndMemory(d.Get("vcpus").(int), d.Get("memory").(int), d.Get("cloudspace_id").(string))
 	if err != nil {
 		return err

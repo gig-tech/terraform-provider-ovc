@@ -1,8 +1,8 @@
 package ovc
 
 import (
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/gig-tech/ovc-sdk-go/ovc"
+	"github.com/hashicorp/terraform/helper/schema"
 )
 
 // Provider method to define all user inputs
@@ -17,15 +17,21 @@ func Provider() *schema.Provider {
 			},
 			"client_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ITSYOU_ONLINE_CLIENT_ID", nil),
 				Description: "Client Id",
 			},
 			"client_secret": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ITSYOU_ONLINE_CLIENT_SECRET", nil),
 				Description: "Client Secret",
+			},
+			"client_jwt": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("ITSYOU_ONLINE_CLIENT_JWT", nil),
+				Description: "Client JWT",
 			},
 		},
 
@@ -55,9 +61,8 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		Hostname:     d.Get("server_url").(string) + "/restmachine",
 		ClientID:     d.Get("client_id").(string),
 		ClientSecret: d.Get("client_secret").(string),
+		JWT:          d.Get("client_jwt").(string),
 	}
 
-	client := ovc.NewClient(&config, d.Get("server_url").(string))
-
-	return client, nil
+	return ovc.NewClient(&config, d.Get("server_url").(string))
 }

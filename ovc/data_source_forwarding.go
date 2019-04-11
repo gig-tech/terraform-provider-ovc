@@ -53,7 +53,7 @@ func dataSourceOvcPortForwarding() *schema.Resource {
 }
 
 func dataSourceOvcPortForwardingRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	var list *ovc.PortForwardingList
 	if machineID, ok := d.GetOk("machine_id"); ok {
 		if cloudspaceID, ok := d.GetOk("cloudspace_id"); ok {

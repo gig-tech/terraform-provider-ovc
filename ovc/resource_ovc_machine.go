@@ -126,7 +126,7 @@ func resourceOvcMachine() *schema.Resource {
 }
 
 func resourceOvcMachineExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	_, err := client.Machines.Get(d.Id())
 	if err != nil {
 		return false, nil
@@ -135,7 +135,7 @@ func resourceOvcMachineExists(d *schema.ResourceData, m interface{}) (bool, erro
 }
 
 func resourceOvcMachineRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	machineInfo, err := client.Machines.Get(d.Id())
 	if err != nil {
 		log.Println("machine not found error")
@@ -163,7 +163,7 @@ func resourceOvcMachineRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceOvcMachineCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	machineConfig := ovc.MachineConfig{}
 	machineConfig.CloudspaceID = d.Get("cloudspace_id").(int)
 	machineConfig.Name = d.Get("name").(string)
@@ -188,7 +188,7 @@ func resourceOvcMachineCreate(d *schema.ResourceData, m interface{}) error {
 func resourceOvcMachineUpdate(d *schema.ResourceData, m interface{}) error {
 
 	var err error
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	machineConfig := ovc.MachineConfig{}
 	machineConfig.MachineID = d.Id()
 	if d.HasChange("name") {
@@ -214,7 +214,7 @@ func resourceOvcMachineUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceOvcMachineDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	machineConfig := ovc.MachineConfig{}
 	machineConfig.MachineID = d.Id()
 	machineConfig.Permanently = true

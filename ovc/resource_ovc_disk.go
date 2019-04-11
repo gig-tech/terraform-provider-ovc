@@ -49,7 +49,7 @@ func resourceOvcDisk() *schema.Resource {
 }
 
 func resourceOvcDiskExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	disk, err := client.Disks.Get(d.Id())
 	if err != nil || disk.Status == "DESTROYED" {
 		return false, nil
@@ -58,7 +58,7 @@ func resourceOvcDiskExists(d *schema.ResourceData, m interface{}) (bool, error) 
 }
 
 func resourceOvcDiskRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	diskID := d.Id()
 	_, err := client.Disks.Get(diskID)
 	if err != nil {
@@ -69,7 +69,7 @@ func resourceOvcDiskRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceOvcDiskCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	diskConfig := ovc.DiskConfig{}
 	diskConfig.MachineID = d.Get("machine_id").(int)
 	diskConfig.DiskName = d.Get("disk_name").(string)
@@ -92,7 +92,7 @@ func resourceOvcDiskUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceOvcDiskDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	diskConfig := ovc.DiskDeleteConfig{}
 	diskID, err := strconv.Atoi(d.Id())
 	diskConfig.DiskID = diskID

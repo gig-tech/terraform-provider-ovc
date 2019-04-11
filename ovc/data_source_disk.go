@@ -45,7 +45,7 @@ func dataSourceOvcDisk() *schema.Resource {
 }
 
 func dataSourceOvcDiskRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	var disk *ovc.DiskInfo
 	var err error
 	if v, ok := d.GetOk("disk_id"); ok {

@@ -59,7 +59,7 @@ func dataSourceOvcCloudSpaces() *schema.Resource {
 }
 
 func dataSourceOvcCloudSpacesRead(d *schema.ResourceData, m interface{}) error {
-	c := m.(*ovc.OvcClient)
+	c := m.(*ovc.Client)
 	cloudSpaces, err := c.CloudSpaces.List()
 	if err != nil {
 		return err

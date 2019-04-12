@@ -46,7 +46,7 @@ func dataSourceOvcImages() *schema.Resource {
 }
 
 func dataSourceOvcImagesRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*ovc.OvcClient)
+	client := m.(*ovc.Client)
 	var err error
 	var accountID int
 	account := d.Get("account")
@@ -58,6 +58,10 @@ func dataSourceOvcImagesRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	images, err := client.Images.List(accountID)
+	if err != nil {
+		return err
+	}
+
 	nameRegex := d.Get("name_regex").(string)
 	re := regexp.MustCompile(nameRegex)
 

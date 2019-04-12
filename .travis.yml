@@ -4,24 +4,16 @@ go:
   - "1.11.x"
 
 env:
-  - GO111MODULE=on GOFLAGS=-mod=vendor REPO_NAME=github.com/gig-tech/terraform-provider-ovc
+  - GO111MODULE=on GOFLAGS=-mod=vendor
 
-stages:
-  - test
-  - build
+install:
+  - make tools
 
 jobs:
   include:
-    - stage: test
-      script:
-        - go fmt $(go list ./... | grep -v /vendor/)
-        - go vet $(go list ./... | grep -v /vendor/)
-        - go test -race $(go list ./... | grep -v /vendor/)
-      on:
-        branch: "master"
-        tags: true
     - stage: build
       script:
+        - make lint
         - env GOOS=linux GOARCH=amd64 go build -o terraform-provider-ovc_$(git describe --exact-match --tags HEAD 2>/dev/null || echo "")-linux .
         - env GOOS=darwin GOARCH=amd64 go build -o terraform-provider-ovc_$(git describe --exact-match --tags HEAD 2>/dev/null || echo "")-mac .
       on:

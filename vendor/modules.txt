@@ -48,7 +48,7 @@ github.com/blang/semver
 github.com/davecgh/go-spew/spew
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
 github.com/dgrijalva/jwt-go
-# github.com/gig-tech/ovc-sdk-go v0.1.0
+# github.com/gig-tech/ovc-sdk-go v0.2.0
 github.com/gig-tech/ovc-sdk-go/ovc
 # github.com/go-ini/ini v1.25.4
 github.com/go-ini/ini

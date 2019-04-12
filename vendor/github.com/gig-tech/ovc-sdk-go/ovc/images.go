@@ -18,6 +18,22 @@ type ImageConfig struct {
 	AccountID int    `json:"accountId"`
 }
 
+// ImageList is a list of images
+// Returned when using the List method
+type ImageList []ImageInfo
+
+// ImageInfo contains information about the image returned by API
+type ImageInfo struct {
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Size        int    `json:"size"`
+	Status      string `json:"status"`
+	Type        string `json:"type"`
+	AccountID   int    `json:"accountId"`
+	Username    string `json:"username"`
+}
+
 // ImageService is an interface for interfacing with the images
 // of the OVC API
 // See: https://ch-lug-dc01-001.gig.tech/system/
@@ -25,6 +41,7 @@ type ImageService interface {
 	Upload(*ImageConfig) error
 	DeleteByID(int) error
 	DeleteSystemImageByID(int, string) error
+	List(int) (*ImageList, error)
 }
 
 // ImageServiceOp handles communication with the image related methods of the
@@ -91,4 +108,29 @@ func (s *ImageServiceOp) DeleteSystemImageByID(imageID int, reason string) error
 		return err
 	}
 	return nil
+}
+
+// List all system images
+func (s *ImageServiceOp) List(accountID int) (*ImageList, error) {
+	accountIDMap := make(map[string]interface{})
+	accountIDMap["accountId"] = accountID
+	accountIDJson, err := json.Marshal(accountIDMap)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", s.client.ServerURL+"/cloudapi/images/list", bytes.NewBuffer(accountIDJson))
+	if err != nil {
+		return nil, err
+	}
+	body, err := s.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	var images = new(ImageList)
+	err = json.Unmarshal(body, &images)
+	if err != nil {
+		return nil, err
+	}
+	return images, nil
 }

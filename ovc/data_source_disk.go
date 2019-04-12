@@ -52,9 +52,9 @@ func dataSourceOvcDiskRead(d *schema.ResourceData, m interface{}) error {
 		disk, err = client.Disks.Get(v.(string))
 	} else {
 		disk, err = client.Disks.GetByName(d.Get("name").(string), d.Get("account_id").(string))
-		if err != nil {
-			return err
-		}
+	}
+	if err != nil {
+		return err
 	}
 	d.SetId(strconv.Itoa(disk.ID))
 	d.Set("disk_id", disk.ID)

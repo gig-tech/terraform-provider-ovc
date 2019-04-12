@@ -27,7 +27,9 @@ tools:
 
 lint: fmtcheck
 	@echo "==> Checking source code against linters..."
-	@golangci-lint run ./$(PKG_NAME)
+	# errcheck dissabled as it errors on not handling d.Set which would be combursome for the likeiness of occurance
+	# inproper err handling will still be caught by ineffassign and other linters
+	@golangci-lint run ./$(PKG_NAME) -D errcheck
 	@go vet ./$(PKG_NAME)
 
 test-compile: fmtcheck

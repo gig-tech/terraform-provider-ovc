@@ -1,18 +1,10 @@
+dist: trusty
 language: go
-
 go:
-  - "1.10.x"
+  - "1.11.x"
 
 env:
-  - REPO_NAME: github.com/gig-tech/terraform-provider-ovc
-
-before_install:
-  - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)
-  - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
-  - cd $GOPATH/src/$REPO_NAME
-  - ls
-  - pwd
-  - go get -d ./...
+  - GO111MODULE=on GOFLAGS=-mod=vendor REPO_NAME=github.com/gig-tech/terraform-provider-ovc
 
 stages:
   - test

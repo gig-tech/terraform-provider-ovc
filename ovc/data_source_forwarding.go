@@ -58,7 +58,13 @@ func dataSourceOvcPortForwardingRead(d *schema.ResourceData, m interface{}) erro
 	if machineID, ok := d.GetOk("machine_id"); ok {
 		if cloudspaceID, ok := d.GetOk("cloudspace_id"); ok {
 			cID, err := strconv.Atoi(cloudspaceID.(string))
+			if err != nil {
+				return err
+			}
 			mID, err := strconv.Atoi(machineID.(string))
+			if err != nil {
+				return err
+			}
 			portForwardingConfig := &ovc.PortForwardingConfig{
 				CloudspaceID: cID,
 				MachineID:    mID,

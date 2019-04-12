@@ -29,10 +29,7 @@ func resourcePortForwarding() *schema.Resource {
 				Optional: true,
 				// DiffSuppressFunc suppresses change when a ramdom public port was created
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					if new == "0" {
-						return true
-					}
-					return false
+					return new == "0"
 				},
 			},
 			"machine_id": {

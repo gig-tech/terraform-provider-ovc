@@ -3,8 +3,8 @@ package ovc
 import (
 	"strconv"
 
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/gig-tech/ovc-sdk-go/ovc"
+	"github.com/hashicorp/terraform/helper/schema"
 )
 
 func dataSourceOvcSizes() *schema.Resource {

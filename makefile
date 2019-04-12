@@ -8,6 +8,12 @@ default: build
 build: fmtcheck
 	go build -mod vendor ${BUILDARGS}
 
+build-linux: fmtcheck
+	GOOS=linux GOARCH=amd64 go build -mod vendor ${BUILDARGS} .
+	
+build-darwin: fmtcheck
+	GOOS=darwin GOARCH=amd64 go build -mod vendor ${BUILDARGS} .
+
 install: fmtcheck
 	go install -mod vendor
 
@@ -32,12 +38,4 @@ lint: fmtcheck
 	@golangci-lint run ./$(PKG_NAME) -D errcheck
 	@go vet ./$(PKG_NAME)
 
-test-compile: fmtcheck
-	@if [ "$(TEST)" = "./..." ]; then \
-		echo "ERROR: Set TEST to a specific package. For example,"; \
-		echo "  make test-compile TEST=./$(PKG_NAME)"; \
-		exit 1; \
-	fi
-	go test -c $(TEST) $(TESTARGS)
-
-.PHONY: default build install test fmt fmtcheck lint tools test-compile
+.PHONY: default build install test fmt fmtcheck lint tools

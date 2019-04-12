@@ -11,22 +11,26 @@ install:
 
 jobs:
   include:
-    - stage: build
+    - stage: test
+      if: NOT tag IS present
       script:
         - make lint
-        - env GOOS=linux GOARCH=amd64 go build -o terraform-provider-ovc_$(git describe --exact-match --tags HEAD 2>/dev/null || echo "")-linux .
-        - env GOOS=darwin GOARCH=amd64 go build -o terraform-provider-ovc_$(git describe --exact-match --tags HEAD 2>/dev/null || echo "")-mac .
+        - make
       on:
         branch: "master"
-        tags: true
-
-deploy:
-  provider: releases
-  api_key: 
-    secure: "UJVeky9S4dOo4KqHtegOkJRxUlbgOs8owtoa+aOce5oY1HLgVHEUGGAU0+9G6e1awamr77o0EUhgwm+ut6HurPz7yIf47EfUtfkkPbINaxNEyOxO3Nj3xEVr6Ziwh9ydimx6xhufJE/WCZBsuWpsREZxxq5dLYq7RQKYMmJ7xUDg4rE3Zle3QNTkRBdFbwoK39s6UKd/vBDZJ/sf+H8gsL97MEtJzfkZgGmU4Wu5A/7MGaw4qcneEqWCoykOrmTy7HSay/XnlNHdPPPYBtUVszWmTWWxHE+ZEgMbZDZm5h1YU8f3x2SDbQ9iy1PnWhHLbFuTrD7M7ZPFF/jcFRXwGn/VpAmiE/F0UBDuKbTVxHDJcTOQc+iS+bP9NayykUwjeoThfUnFT76XqBsiVjQiJzN1U1HtPQqffGo94NxQgNCy6hTpZjiqXDoZeoyr4DgscjU0RmlFqrLr1eN4S4AN2UMvLfL/iKw5amUTW/HbQxAhFfMtVTlNaw8GFKdAaYf8BnRmKq5Uuz/Pedzl1PXljDCiIdf7Gt8qBX6T9PIcBUH3WNkE0rAlBWehmmQX1Gy7/2goDNbFHuxAzc15xyTCnxkIfmYFm+DgbJAq6fsTELIDTYMNc/Mk7K16NjwMpveUcvdLHdfuJgpmsil8dXcKnq3EOEkqiGhcYN/brPtYeZY="
-  file:
-    - terraform-provider-ovc_$(git describe --tags --abbrev=0)-linux
-    - terraform-provider-ovc_$(git describe --tags --abbrev=0)-mac
-  skip_cleanup: true
-  on:
-    tags: true
+    - stage: deploy
+      if: tag IS present
+      script:
+        - make lint
+        - make build-linux BUILDARGS="-o terraform-provider-ovc_$(git describe --tags --abbrev=0)-linux"
+        - make build-darwin BUILDARGS="-o terraform-provider-ovc_$(git describe --tags --abbrev=0)-mac"
+      deploy:
+        provider: releases
+        api_key: 
+          secure: "UJVeky9S4dOo4KqHtegOkJRxUlbgOs8owtoa+aOce5oY1HLgVHEUGGAU0+9G6e1awamr77o0EUhgwm+ut6HurPz7yIf47EfUtfkkPbINaxNEyOxO3Nj3xEVr6Ziwh9ydimx6xhufJE/WCZBsuWpsREZxxq5dLYq7RQKYMmJ7xUDg4rE3Zle3QNTkRBdFbwoK39s6UKd/vBDZJ/sf+H8gsL97MEtJzfkZgGmU4Wu5A/7MGaw4qcneEqWCoykOrmTy7HSay/XnlNHdPPPYBtUVszWmTWWxHE+ZEgMbZDZm5h1YU8f3x2SDbQ9iy1PnWhHLbFuTrD7M7ZPFF/jcFRXwGn/VpAmiE/F0UBDuKbTVxHDJcTOQc+iS+bP9NayykUwjeoThfUnFT76XqBsiVjQiJzN1U1HtPQqffGo94NxQgNCy6hTpZjiqXDoZeoyr4DgscjU0RmlFqrLr1eN4S4AN2UMvLfL/iKw5amUTW/HbQxAhFfMtVTlNaw8GFKdAaYf8BnRmKq5Uuz/Pedzl1PXljDCiIdf7Gt8qBX6T9PIcBUH3WNkE0rAlBWehmmQX1Gy7/2goDNbFHuxAzc15xyTCnxkIfmYFm+DgbJAq6fsTELIDTYMNc/Mk7K16NjwMpveUcvdLHdfuJgpmsil8dXcKnq3EOEkqiGhcYN/brPtYeZY="
+        file:
+          - terraform-provider-ovc_$(git describe --tags --abbrev=0)-linux
+          - terraform-provider-ovc_$(git describe --tags --abbrev=0)-mac
+        skip_cleanup: true
+        on:
+          tags: true

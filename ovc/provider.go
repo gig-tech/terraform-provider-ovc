@@ -46,6 +46,8 @@ func Provider() *schema.Provider {
 			"ovc_cloudspaces":     dataSourceOvcCloudSpaces(),
 			"ovc_machines":        dataSourceOvcMachines(),
 			"ovc_port_forwarding": dataSourceOvcPortForwarding(),
+			"ovc_images":          dataSourceOvcImages(),
+			"ovc_image":           dataSourceOvcImage(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{

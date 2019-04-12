@@ -16,8 +16,8 @@ git clone git@github.com:gig-tech/terraform-provider-ovc.git $GOPATH/src/github.
 go get -v -u github.com/hashicorp/terraform/terraform
 go get -v -u github.com/gig-tech/ovc-sdk-go/ovc
 cd $GOPATH/src/github.com/gig-tech/terraform-provider-ovc
-go build -o terraform-provider-ovc_v1.0.0 .
-mv terraform-provider-ovc_v1.0.0 ~/.terraform.d/plugins
+go build -o terraform-provider-ovc .
+mv terraform-provider-ovc ~/.terraform.d/plugins
 ```
 
 Put the binary in your plugins folder of terraform. For more information:
@@ -44,7 +44,7 @@ provider "ovc" {
 Authentication is through itsyouonline with a client ID and client secret
 
 
-## Argument Reference
+### Argument Reference
 
 The following arguments are supported in the provider block:
 
@@ -61,14 +61,14 @@ export ITSYOU_ONLINE_CLIENT_SECRET="your-client-secret"
 ```
 This way the provider information must not be included in your terraform configuration file.
 
-# Resources
+## Resources
 
 * [ovc_machine](#Resource:-ovc_machine)
 * [ovc_disk](#Resource:-ovc_disk)
 * [ovc_port_forwarding](#Resource:-ovc_port_forwarding)
 * [ovc_cloudspace](#Resource:-ovc_cloudspace)
 
-# Data Sources
+## Data Sources
 
 * [ovc_machine](#Data-source:-ovc_machine)
 * [ovc_cloudspace](#Data-source:-ovc_cloudspace)
@@ -76,12 +76,15 @@ This way the provider information must not be included in your terraform configu
 * [ovc_sizes](#Data-source:-ovc_sizes)
 * [ovc_machines](#Data-source:-ovc_machines)
 * [ovc_cloudspaces](#Data-source:-ovc_cloudspaces)
+* [ovc_image](#Data-source:-ovc_image)
+* [ovc_images](#Data-source:-ovc_images)
 
-# Resource: ovc_machine
+
+## Resource: ovc_machine
 
 Provides a ovc machine. This allows machines to be created, updated and deleted
 
-## Example Usage
+### Example Usage
 
 ```hcl
 variable "cloudspace_id" {}
@@ -108,7 +111,7 @@ echo $cloudspaces_json | jq -r 'map(select(any(.name; contains($cn)))|.id)[]' --
 
 ```
 
-## Argument Reference
+### Argument Reference
 
 The following arguments are supported:
 
@@ -120,11 +123,11 @@ The following arguments are supported:
 * description - (Optional) Description of the machine
 
 
-# Resource: ovc_disk
+## Resource: ovc_disk
 
 Creates extra disks used by ovc machines
 
-## Example Usage
+### Example Usage
 
 ```hcl
 variable "cloudspace_id" {}
@@ -149,7 +152,7 @@ resource "ovc_disk" "disk" {
 }
 ```
 
-## Argument Reference
+### Argument Reference
 
 The following arguments are supported:
 
@@ -161,11 +164,11 @@ The following arguments are supported:
 * ssdSize - (Optional) Size in gigabytes of the ssd disk
 * iops - (Optional) Maximum IOPS disk can perform, defaults to 2000
 
-# Resource: ovc_port_forwarding
+## Resource: ovc_port_forwarding
 
 Manages port forwarding
 
-## Example Usage
+### Example Usage
 
 ```hcl
 variable "cloudspace_id" {}
@@ -201,7 +204,7 @@ export cloudspaces_json=$(curl -X POST -H "Authorization: bearer $JWT" https://c
 echo $cloudspaces_json | jq -r 'map(select(any(.name; contains($cn)))|.externalnetworkip)[]' --arg cn "$cloudspace_name"
 ```
 
-## Argument Reference
+### Argument Reference
 
 * cloudspace_id - (Required) ID of the cloudspace
 * public_ip - (Required) public ip of the cloudspace
@@ -210,11 +213,11 @@ echo $cloudspaces_json | jq -r 'map(select(any(.name; contains($cn)))|.externaln
 * local_port - (Required) local port of the machine where to forward to
 * protocol - (Required) protocol to use, either "tcp" or "udp"
 
-# Resource: ovc_cloudspace
+## Resource: ovc_cloudspace
 
 Creates cloudpsaces
 
-## Example Usage
+### Example Usage
 
 ```hcl
 resource "ovc_cloudspace" "cloudspace" {
@@ -242,23 +245,23 @@ export accounts_json=$(curl -X POST -H "Authorization: bearer $JWT" https://ch-l
 echo $accounts_json | jq -r 'map(select(any(.name; contains($account_name)))|.id)[]' --arg account_name "$account_name"
 ```
 
-## Argument Reference
+### Argument Reference
 
 * account - (Required) Name of the account this cloudspace belongs to
 * name - (Required) name of space to create
 * resource_limits - (Optional) specify resource limits block 
-  *  max_memory_capacity - (Optional) max size of memory in GB
-  *  max_disk_capacity - (Optional) max size of aggregated vdisks in GB
-  *  max_cpu_capacity - (Optional) max number of cpu cores
-  *  max_num_public_ip - (Optional) max number of assigned public IPs
-  *  max_network_peer_transfer - (Optional) max sent/received network transfer peering
+  * max_memory_capacity - (Optional) max size of memory in GB
+  * max_disk_capacity - (Optional) max size of aggregated vdisks in GB
+  * max_cpu_capacity - (Optional) max number of cpu cores
+  * max_num_public_ip - (Optional) max number of assigned public IPs
+  * max_network_peer_transfer - (Optional) max sent/received network transfer peering
 
 
-# Data Source: ovc_machine
+## Data Source: ovc_machine
 
 Use this data source to get the ID of a machine in a cloudspace by name
 
-## Example Usage
+### Example Usage
 
 ```hcl
 data "ovc_machine" "machine" {
@@ -267,16 +270,16 @@ data "ovc_machine" "machine" {
 }
 ```
 
-## Argument Reference
+### Argument Reference
 
 * name - (Required) name of machine to look up
 * cloudspace_id - (Required) ID of the cloudspace where the machine is located
 
-# Data Source: ovc_cloudspace
+## Data Source: ovc_cloudspace
 
 Use this data source to get the ID of a cloudspace in a location by name
 
-## Example Usage
+### Example Usage
 
 ```hcl
 data "ovc_cloudspace" "cloudspace" {
@@ -285,16 +288,16 @@ data "ovc_cloudspace" "cloudspace" {
 }
 ```
 
-## Argument Reference
+### Argument Reference
 
 * name - (Required) name of cloudspace to look up
 * account - (Required) name of the account where the cloudspace is located
 
-# Data Source: ovc_sizes
+## Data Source: ovc_sizes
 
 Use this data source to get ID of sizes given vcpus and memory
 
-## Example Usage
+### Example Usage
 
 ```hcl
 data "ovc_sizes" "size" {
@@ -304,7 +307,7 @@ data "ovc_sizes" "size" {
 }
 ```
 
-## Argument Reference
+### Argument Reference
 
 * cloudspace_id - (Required) cloudspace ID where the size is located
 * memory - (Required) memory of the size
@@ -314,7 +317,7 @@ data "ovc_sizes" "size" {
 
 Use this data source to get the ID of a disk in a cloudspace by name
 
-## Example Usage
+### Example Usage
 
 ```hcl
 data "ovc_disk" "disk" {
@@ -323,12 +326,12 @@ data "ovc_disk" "disk" {
 }
 ```
 
-## Argument Reference
+### Argument Reference
 
 * account_id - (Required) ID of the account where the disk is located
 * name - (Required) name of the disk to look up
 
-# Data Source: ovc_machines
+## Data Source: ovc_machines
 
 Use this data source to retrieve information about all machines in a given cloudspace
 
@@ -340,21 +343,61 @@ data "ovc_machines" "machines" {
 }
 ```
 
-## Argument Reference
+### Argument Reference
 
 * cloudspace_id - (Required) ID of the cloudspace where the machines are located
 
-# Data Source: ovc_cloudspaces
+## Data Source: ovc_cloudspaces
 
 Use this data source to retrieve information about all cloudspaces in a given location
 
-## Example Usage
+### Example Usage
 
 ```hcl
 data "ovc_cloudspaces" "cloudspaces" {
 }
 ```
 
-## Argument Reference
+### Argument Reference
 
 * No arguments needed for this data source
+
+
+## Data Source: ovc_image
+
+Use this data source to retrieve image by name. If more that single image matches the query, Terraform will fail.
+To return the list of images use the data source [`ovc_images`](#Data-Source:-ovc_images).
+
+### Example Usage
+
+```hcl
+data "ovc_image" "im"{
+  account = "<Account Name>"
+  name_regex = "<ImageName>"
+  most_recent = true
+}
+```
+
+### Argument Reference
+
+* `account` - (Optional) name of the account to retrieve images from. If set to 0, only system images will be looked up.
+* `name_regex` - (Optional) full name or name pattern for regex search. If set to "" all available images will be looked up
+* `most_recent` - (Optional) If set to `true` will search for the latest crated image within the scope (image with the largest ID)
+
+## Data Source: ovc_images
+
+Use this data source to retrieve list of images by name
+
+### Example Usage
+
+```hcl
+data "ovc_image" "im"{
+  account = "<Account Name>"
+  name_regex = "<ImageName>"
+}
+```
+
+### Argument Reference
+
+* `account` - (Optional) name of the account to retrieve images from. If set to 0, only system images will be looked up.
+* `name_regex` - (Optional) full name or name pattern for regex search. If set to "" all available images will be looked up

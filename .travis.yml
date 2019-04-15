@@ -14,14 +14,14 @@ jobs:
     - stage: test
       if: NOT tag IS present
       script:
-        - make lint
+        - make test
         - make
       on:
         branch: "master"
     - stage: deploy
       if: tag IS present
       script:
-        - make lint
+        - make test
         - make build-linux BUILDARGS="-o terraform-provider-ovc_$(git describe --tags --abbrev=0)-linux"
         - make build-darwin BUILDARGS="-o terraform-provider-ovc_$(git describe --tags --abbrev=0)-mac"
       deploy:

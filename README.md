@@ -223,6 +223,7 @@ Creates cloudpsaces
 resource "ovc_cloudspace" "cloudspace" {
   account = "${var.account}"
   name = "cloudspace"
+  private_network = "192.168.100.0/24"
    resource_limits = {
      max_memory_capacity = 3.0
      max_disk_capacity = 12
@@ -247,15 +248,15 @@ echo $accounts_json | jq -r 'map(select(any(.name; contains($account_name)))|.id
 
 ### Argument Reference
 
-* account - (Required) Name of the account this cloudspace belongs to
-* name - (Required) name of space to create
-* resource_limits - (Optional) specify resource limits block 
-  * max_memory_capacity - (Optional) max size of memory in GB
-  * max_disk_capacity - (Optional) max size of aggregated vdisks in GB
-  * max_cpu_capacity - (Optional) max number of cpu cores
-  * max_num_public_ip - (Optional) max number of assigned public IPs
-  * max_network_peer_transfer - (Optional) max sent/received network transfer peering
-
+* `account` - (Required) Name of the account this cloudspace belongs to
+* `name` - (Required) name of space to create
+* `private_network` - (Optional) private network CIDR eg. 192.168.103.0/24
+* `resource_limits` - (Optional) specify resource limits block
+  * `max_memory_capacity` - (Optional) max size of memory in GB
+  * `max_disk_capacity` - (Optional) max size of aggregated vdisks in GB
+  * `max_cpu_capacity` - (Optional) max number of cpu cores
+  * `max_num_public_ip` - (Optional) max number of assigned public IPs
+  * `max_network_peer_transfer` - (Optional) max sent/received network transfer peering
 
 ## Data Source: ovc_machine
 

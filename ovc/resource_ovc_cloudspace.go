@@ -18,6 +18,12 @@ func resourceOvcCloudSpace() *schema.Resource {
 		Delete: resourceOvcCloudSpaceDelete,
 		Exists: resourceOvcCloudspaceExists,
 
+		CustomizeDiff: func(diff *schema.ResourceDiff, v interface{}) error {
+			if diff.HasChange("private_network") {
+				return fmt.Errorf("Cannot change Private Network on existing cloudspace")
+			}
+			return nil
+		},
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -40,6 +46,7 @@ func resourceOvcCloudSpace() *schema.Resource {
 			"private_network": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"status": {
 				Type:     schema.TypeString,
@@ -113,11 +120,11 @@ func resourceOvcCloudSpaceRead(d *schema.ResourceData, m interface{}) error {
 	}
 	d.Set("status", cloudSpace.Status)
 	rl := make(map[string]interface{})
-	rl["max_memory_capacity"] = strconv.FormatFloat(cloudSpace.ResourceLimits.CUM, 'f', -1, 64)
-	rl["max_disk_capacity"] = strconv.Itoa(cloudSpace.ResourceLimits.CUD)
-	rl["max_cpu_capacity"] = strconv.Itoa(cloudSpace.ResourceLimits.CUC)
-	rl["max_network_peer_transfer"] = strconv.Itoa(cloudSpace.ResourceLimits.CUNP)
-	rl["max_num_public_ip"] = strconv.Itoa(cloudSpace.ResourceLimits.CUI)
+	rl["max_memory_capacity"] = cloudSpace.ResourceLimits.CUM
+	rl["max_disk_capacity"] = cloudSpace.ResourceLimits.CUD
+	rl["max_cpu_capacity"] = cloudSpace.ResourceLimits.CUC
+	rl["max_network_peer_transfer"] = cloudSpace.ResourceLimits.CUNP
+	rl["max_num_public_ip"] = cloudSpace.ResourceLimits.CUI
 	d.Set("resource_limits", rl)
 	d.Set("description", cloudSpace.Description)
 	d.Set("external_network_ip", cloudSpace.Externalnetworkip)
@@ -144,8 +151,8 @@ func resourceOvcCloudSpaceCreate(d *schema.ResourceData, m interface{}) error {
 		MaxDiskCapacity:        -1,
 		MaxNetworkPeerTransfer: -1,
 		MaxNumPublicIP:         -1,
+		PrivateNetwork:         d.Get("private_network").(string),
 	}
-
 	if v, ok := d.GetOk("resource_limits"); ok {
 		rL := v.(map[string]interface{})
 		if rL["max_memory_capacity"] != nil {

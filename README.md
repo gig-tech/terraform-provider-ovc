@@ -26,6 +26,7 @@ https://www.terraform.io/docs/plugins/basics.html#installing-plugins
 
 ## Example Usage
 
+Using client_id/client_secret:
 ```hcl
 variable "client_id" {}
 variable "client_secret" {}
@@ -39,9 +40,32 @@ provider "ovc" {
 }
 ```
 
+Using JWT:
+```hcl
+variable "client_jwt" {}
+variable "ovc_url" {}
+
+provider "ovc" {
+  client_jwt = "${var.client_jwt}"
+  server_url = "${var.ovc_url}"
+}
+```
+
 ## Authentication
 
-Authentication is through itsyouonline with a client ID and client secret
+Authentication is through itsyouonline with a client ID and client secret or a JWT
+
+### Get a JWT
+
+The following command is an example how to get a JWT using the `CURL` command.
+Providing `scope=offline_access` will return a JWT that is refreshable. 
+
+```sh
+JWT=$(curl -d 'grant_type=client_credentials&client_id='"$CLIENT_ID"'&client_secret='"$CLIENT_SECRET"'&response_type=id_token&scope=offline_access' https://itsyou.online/v1/oauth/access_token)
+
+echo $JWT
+```
+
 
 
 ### Argument Reference

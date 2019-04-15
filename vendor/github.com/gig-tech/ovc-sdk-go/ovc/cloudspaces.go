@@ -21,6 +21,7 @@ type CloudSpaceConfig struct {
 	MaxNetworkPeerTransfer int     `json:"maxNetworkPeerTransfer,omitempty"`
 	MaxNumPublicIP         int     `json:"maxNumPublicIP,omitempty"`
 	AllowedVMSizes         []int   `json:"allowedVMSizes,omitempty"`
+	PrivateNetwork         string  `json:"privatenetwork"`
 }
 
 // ResourceLimits contains all information related to resource limits
@@ -54,6 +55,7 @@ type CloudSpace struct {
 	Gid             int    `json:"gid"`
 	Location        string `json:"location"`
 	Publicipaddress string `json:"publicipaddress"`
+	PrivateNetwork  string `json:"privatenetwork"`
 }
 
 // CloudSpaceList returns a list of CloudSpaces

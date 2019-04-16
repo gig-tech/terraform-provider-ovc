@@ -19,7 +19,7 @@ func resourceOvcCloudSpace() *schema.Resource {
 		Exists: resourceOvcCloudspaceExists,
 
 		CustomizeDiff: func(diff *schema.ResourceDiff, v interface{}) error {
-			if diff.HasChange("private_network") {
+			if diff.Id() != "" && diff.HasChange("private_network") {
 				return fmt.Errorf("Cannot change Private Network on existing cloudspace")
 			}
 			return nil

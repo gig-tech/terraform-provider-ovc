@@ -1,6 +1,7 @@
 package ovc
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/gig-tech/ovc-sdk-go/ovc"
@@ -16,6 +17,14 @@ func resourceOvcMachine() *schema.Resource {
 		Exists: resourceOvcMachineExists,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
+		},
+
+		CustomizeDiff: func(diff *schema.ResourceDiff, v interface{}) error {
+			if diff.Id() != "" && diff.HasChange("image_id") {
+				return fmt.Errorf("Cannot change Image ID on existing machine")
+			}
+
+			return nil
 		},
 
 		Schema: map[string]*schema.Schema{

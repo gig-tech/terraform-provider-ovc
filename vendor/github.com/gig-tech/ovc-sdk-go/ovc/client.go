@@ -12,6 +12,11 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
+var (
+	// ErrAuthentication represents an authentication error from the server 401
+	ErrAuthentication = errors.New("OVC authentication error")
+)
+
 // Config used to connect to the API
 type Config struct {
 	Hostname     string
@@ -61,7 +66,10 @@ func (c *Client) Do(req *http.Request) ([]byte, error) {
 
 	log.Println("Status code: " + resp.Status)
 	log.Println("Body: " + string(body))
-	if resp.StatusCode > 202 {
+	switch {
+	case resp.StatusCode == 401:
+		return nil, ErrAuthentication
+	case resp.StatusCode > 202:
 		return body, errors.New(string(body))
 	}
 

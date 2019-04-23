@@ -153,6 +153,9 @@ func (s *ForwardingServiceOp) List(portForwardingConfig *PortForwardingConfig) (
 		return nil, err
 	}
 	req, err := http.NewRequest("POST", s.client.ServerURL+"/cloudapi/portforwarding/list", bytes.NewBuffer(portForwardingJSON))
+	if err != nil {
+		return nil, err
+	}
 	body, err := s.client.Do(req)
 	if err != nil {
 		return nil, err

@@ -120,6 +120,9 @@ func (s *CloudSpaceServiceOp) List() (*CloudSpaceList, error) {
 	cloudSpaceMap := make(map[string]interface{})
 	cloudSpaceMap["includedeleted"] = false
 	cloudSpaceJSON, err := json.Marshal(cloudSpaceMap)
+	if err != nil {
+		return nil, err
+	}
 	req, err := http.NewRequest("POST", s.client.ServerURL+"/cloudapi/cloudspaces/list", bytes.NewBuffer(cloudSpaceJSON))
 	if err != nil {
 		return nil, err

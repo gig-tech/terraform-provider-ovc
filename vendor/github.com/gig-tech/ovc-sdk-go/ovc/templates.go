@@ -39,6 +39,9 @@ func (s *TemplateServiceOp) List(accountID int) (*TemplateList, error) {
 	templateMap := make(map[string]interface{})
 	templateMap["accountId"] = 4
 	templateJSON, err := json.Marshal(templateMap)
+	if err != nil {
+		return nil, err
+	}
 	req, err := http.NewRequest("POST", s.client.ServerURL+"/cloudapi/images/list", bytes.NewBuffer(templateJSON))
 	if err != nil {
 		return nil, err

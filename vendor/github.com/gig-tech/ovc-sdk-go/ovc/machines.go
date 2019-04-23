@@ -229,7 +229,7 @@ func (s *MachineServiceOp) Update(machineConfig *MachineConfig) (string, error) 
 	return string(body), nil
 }
 
-//ht: reszize an existing machine
+// Resize an existing machine
 func (s *MachineServiceOp) Resize(machineConfig *MachineConfig) (string, error) {
 	machineJSON, err := json.Marshal(*machineConfig)
 	if err != nil {

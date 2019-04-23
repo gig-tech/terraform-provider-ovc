@@ -46,8 +46,11 @@ github.com/dnaeon/go-vcr v0.0.0-20170218072653-87d4990451a8/go.mod h1:aBB1+wY4s9
 github.com/dylanmei/iso8601 v0.1.0/go.mod h1:w9KhXSgIyROl1DefbMYIE7UVSIvELTbMrCfx+QkYnoQ=
 github.com/dylanmei/winrmtest v0.0.0-20170819153634-c2fbb09e6c08/go.mod h1:VBVDFSBXCIW8JaHQpI8lldSKfYaLMzP9oyq6IJ4fhzY=
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
+github.com/gig-tech/ovc-sdk-go v0.2.0 h1:iph1MhGrJ8Kp8x6Q4mT+wDr4QBC414VMuAZQP5lOkc8=
 github.com/gig-tech/ovc-sdk-go v0.2.1-0.20190416134221-16a72999fda5 h1:g525XIljxv2TwNX5q7mf4ul/1xpfsWPWo1yLlrFYrAM=
 github.com/gig-tech/ovc-sdk-go v0.2.1-0.20190416134221-16a72999fda5/go.mod h1:lxRFCmRixU3+Xx6Bpep9B8JlUdxs2hA80yihbmc02Pc=
+github.com/gig-tech/ovc-sdk-go v0.2.1-0.20190423153113-11cb22b29474 h1:Wr/1tiT+Mc1LjKi4PfqwxsIflviM4fHn3fBBLqSSL14=
+github.com/gig-tech/ovc-sdk-go v0.2.1-0.20190423153113-11cb22b29474/go.mod h1:fJ/X+HOGP/sgapmU4p7emmgxHl9Br0KiLuxpLsyrsbs=
 github.com/go-ini/ini v1.25.4 h1:Mujh4R/dH6YL8bxuISne3xX2+qcQ9p0IxKAP6ExWoUo=
 github.com/go-ini/ini v1.25.4/go.mod h1:ByCAeIL28uOIIG0E3PJtZPDL8WnHpFKFOtgjp+3Ies8=
 github.com/go-test/deep v1.0.1 h1:UQhStjbkDClarlmv0am7OXXO4/GaPdCGiUiMTvi28sg=
@@ -177,6 +180,7 @@ github.com/smartystreets/goconvey v0.0.0-20181108003508-044398e4856c/go.mod h1:X
 github.com/soheilhy/cmux v0.1.4/go.mod h1:IM3LyeVVIOuxMH7sFAkER9+bJ4dT7Ms6E4xg4kGIyLM=
 github.com/spf13/afero v1.0.2/go.mod h1:j4pytiNVoe2o6bmDsKpLACNPDBIoEAkihy7loJ1B0CQ=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
+github.com/stretchr/objx v0.2.0/go.mod h1:qt09Ya8vawLte6SNmTgCsAVtYtaKzEcn8ATUoHMkEqE=
 github.com/stretchr/testify v1.3.0 h1:TivCn/peBQ7UY8ooIcPgZFpTNSz0Q2U6UrFlUfqbe0Q=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/svanharmelen/jsonapi v0.0.0-20180618144545-0c0828c3f16d/go.mod h1:BSTlc8jOjh0niykqEGVXOLXdi9o0r0kR8tCYiMvjFgw=

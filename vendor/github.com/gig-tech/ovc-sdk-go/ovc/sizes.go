@@ -49,6 +49,9 @@ func (s *SizesServiceOp) List(cloudspaceID string) (*SizesList, error) {
 	sizesMap := make(map[string]interface{})
 	sizesMap["cloudspaceId"] = cloudspaceID
 	sizesJSON, err := json.Marshal(sizesMap)
+	if err != nil {
+		return nil, err
+	}
 	req, err := http.NewRequest("POST", s.client.ServerURL+"/cloudapi/sizes/list", bytes.NewBuffer(sizesJSON))
 	if err != nil {
 		return nil, err

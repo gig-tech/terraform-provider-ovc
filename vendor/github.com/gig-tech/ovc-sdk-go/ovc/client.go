@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-
-	"github.com/dgrijalva/jwt-go"
 )
 
 var (
@@ -33,7 +31,7 @@ type Credentials struct {
 
 // Client struct
 type Client struct {
-	JWT       string
+	JWT       *JWT
 	ServerURL string
 	Access    string
 
@@ -51,7 +49,11 @@ type Client struct {
 func (c *Client) Do(req *http.Request) ([]byte, error) {
 	var body []byte
 	client := &http.Client{}
-	req.Header.Set("Authorization", "bearer "+c.JWT)
+	tokenString, err := c.JWT.Get()
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("bearer %s", tokenString))
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
 	if err != nil {
@@ -84,21 +86,27 @@ func NewClient(c *Config, url string) (*Client, error) {
 
 	client := &Client{}
 	tokenString := ""
-	claims := jwt.MapClaims{}
 
 	if c.JWT == "" {
 		tokenString = NewLogin(c)
 	} else {
 		tokenString = c.JWT
 	}
-	jwt.ParseWithClaims(tokenString, claims, nil)
-	username, ok := claims["username"]
-	if !ok {
-		return nil, fmt.Errorf("JWT does not contain a username claim")
+	jwt, err := NewJWT(tokenString, "IYO")
+	if err != nil {
+		return nil, err
+	}
+
+	username, err := jwt.Claim("username")
+	if err != nil {
+		if err == ErrClaimNotPresent {
+			return nil, fmt.Errorf("Username not in JWT claims")
+		}
+		return nil, err
 	}
 
 	client.ServerURL = url + "/restmachine"
-	client.JWT = tokenString
+	client.JWT = jwt
 	client.Access = username.(string) + "@itsyouonline"
 
 	client.Machines = &MachineServiceOp{client: client}

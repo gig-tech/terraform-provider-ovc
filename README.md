@@ -30,11 +30,11 @@ Using client_id/client_secret:
 ```hcl
 variable "client_id" {}
 variable "client_secret" {}
-variable "ovc_url" {}
+variable "server_url" {}
 
 # Configure the ovc provider
 provider "ovc" {
-  server_url = "${var.ovc_url}"
+  server_url = "${var.server_url}"
   client_id = "${var.client_id}"
   client_secret = "${var.client_secret}"
 }
@@ -43,47 +43,51 @@ provider "ovc" {
 Using JWT:
 ```hcl
 variable "client_jwt" {}
-variable "ovc_url" {}
+variable "server_url" {}
 
 provider "ovc" {
   client_jwt = "${var.client_jwt}"
-  server_url = "${var.ovc_url}"
+  server_url = "${var.server_url}"
 }
 ```
 
 ## Authentication
 
-Authentication is through itsyouonline with a client ID and client secret or a JWT
+Authentication is done with an [https://itsyou.online](itsyouonline) client ID and client secret pair, or with a JWT.
 
-### Get a JWT
+### Authentication with client ID and client secret pair
 
-The following command is an example how to get a JWT using the `CURL` command.
-Providing `scope=offline_access` will return a JWT that is refreshable. 
-
-```sh
-JWT=$(curl -d 'grant_type=client_credentials&client_id='"$CLIENT_ID"'&client_secret='"$CLIENT_SECRET"'&response_type=id_token&scope=offline_access' https://itsyou.online/v1/oauth/access_token)
-
-echo $JWT
-```
-
-
-
-### Argument Reference
-
-The following arguments are supported in the provider block:
+To configure the ovc provider to authenticate you need to configure the following
+arguments:
 
 * server_url - (Required) The server url of the ovc api to connect to
 * client_id - (Required) The client_id of the itsyouonline user
 * client_secret - (Required) The client_secret of the itsyouonline user
 
-The arguments can be provided as environment variables:
+It is advisable to set these arguments as environment variables:
 
 ```
 export OPENVCLOUD_SERVER_URL="server-url"
 export ITSYOU_ONLINE_CLIENT_ID="your-client-id"
 export ITSYOU_ONLINE_CLIENT_SECRET="your-client-secret"
 ```
-This way the provider information must not be included in your terraform configuration file.
+This way the arguments must not be included in your terraform configuration file.
+
+### Authentication with a JWT
+
+The following command is an example how to get a JWT using the `curl` command.
+Providing `scope=offline_access` will return a JWT that is refreshable.
+
+```sh
+JWT=$(curl --silent -d 'grant_type=client_credentials&client_id='"$CLIENT_ID"'&client_secret='"$CLIENT_SECRET"'&response_type=id_token&scope=offline_access' https://itsyou.online/v1/oauth/access_token)
+echo $JWT
+
+By configuration the following parameters you will configure the ovc provider to authenticate
+with the JWT
+```
+* server_url - (Required) The server url of the ovc api to connect to
+* client_jwt - (Required) the JWT that is tied to your client_id and client_secret
+```
 
 ## Resources
 

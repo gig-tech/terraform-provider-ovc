@@ -66,6 +66,10 @@ func resourceOvcMachine() *schema.Resource {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
+			"iops": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
 			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -187,11 +191,20 @@ func resourceOvcMachineCreate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	log.Println("NEW MACHINE ID: " + machineID)
+	log.Println("[DEBUG] New machine ID: " + machineID)
 	d.SetId(machineID)
-	log.Println(d.Id())
-	return resourceOvcMachineRead(d, m)
+	log.Println("[DEBUG] Resource machine ID: " + d.Id())
 
+	// Set IOPS boot disk
+	iops := d.Get("iops")
+	if iops != nil {
+		err := updateIOPS(client, d, iops.(int))
+		if err != nil {
+			return err
+		}
+	}
+
+	return resourceOvcMachineRead(d, m)
 }
 
 func resourceOvcMachineUpdate(d *schema.ResourceData, m interface{}) error {
@@ -216,6 +229,16 @@ func resourceOvcMachineUpdate(d *schema.ResourceData, m interface{}) error {
 		_, err = client.Machines.Resize(&machineConfig)
 		if err != nil {
 			return err
+		}
+	}
+
+	if d.HasChange("iops") {
+		iops := d.Get("iops")
+		if iops != nil {
+			err := updateIOPS(client, d, iops.(int))
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -252,4 +275,30 @@ func flattenDisks(machineInfo *ovc.MachineInfo) []map[string]interface{} {
 		log.Printf("disks in map: %v", result)
 	}
 	return result
+}
+
+func updateIOPS(client *ovc.Client, d *schema.ResourceData, iops int) error {
+	machineInfo, err := client.Machines.Get(d.Id())
+	if err != nil {
+		return err
+	}
+
+	log.Println("[DEBUG] Setting machine IOPS")
+	for _, disk := range machineInfo.Disks {
+		if disk.Type == "B" {
+			log.Println("[DEBUG] Boot disk found")
+			diskConfig := &ovc.DiskConfig{
+				DiskID: disk.ID,
+				IOPS:   iops,
+			}
+
+			err = client.Disks.Update(diskConfig)
+			if err != nil {
+				return err
+			}
+
+		}
+	}
+
+	return nil
 }

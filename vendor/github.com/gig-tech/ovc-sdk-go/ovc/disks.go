@@ -183,7 +183,7 @@ func (s *DiskServiceOp) Attach(diskAttachConfig *DiskAttachConfig) error {
 	return nil
 }
 
-// Detach detatches an existing disk to a machine
+// Detach detaches an existing disk from a machine
 func (s *DiskServiceOp) Detach(diskAttachConfig *DiskAttachConfig) error {
 	diskConfigJSON, err := json.Marshal(*diskAttachConfig)
 	if err != nil {
@@ -206,15 +206,42 @@ func (s *DiskServiceOp) Update(diskConfig *DiskConfig) error {
 	if err != nil {
 		return err
 	}
+
+	switch {
+	case diskConfig.Size != 0:
+		err := s.resize(diskConfigJSON)
+		if err != nil {
+			return err
+		}
+
+		fallthrough
+
+	case diskConfig.IOPS != 0:
+		err := s.updateIOPS(diskConfigJSON)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *DiskServiceOp) resize(diskConfigJSON []byte) error {
 	req, err := http.NewRequest("POST", s.client.ServerURL+"/cloudapi/disks/resize", bytes.NewBuffer(diskConfigJSON))
 	if err != nil {
 		return err
 	}
 	_, err = s.client.Do(req)
+	return err
+}
+
+func (s *DiskServiceOp) updateIOPS(diskConfigJSON []byte) error {
+	req, err := http.NewRequest("POST", s.client.ServerURL+"/cloudapi/disks/limitIO", bytes.NewBuffer(diskConfigJSON))
 	if err != nil {
 		return err
 	}
-	return nil
+	_, err = s.client.Do(req)
+	return err
 }
 
 // Delete an existing Disk

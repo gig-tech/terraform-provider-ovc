@@ -1,12 +1,9 @@
 provider "ovc" {
   server_url = "${var.server_url}"
+  client_id = "${var.client_id}"
+  client_secret = "${var.client_secret}"
 }
 
-# Definition of the our cloudspace
-#resource "ovc_cloudspace" "cs" {
-#  account = "${var.account}"
-#  name = "${var.cs_name}"
-#}
 
 # Data definition for every cloudspace
 # To be able to get the ip address

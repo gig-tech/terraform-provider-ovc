@@ -56,18 +56,20 @@ func (c *Client) Do(req *http.Request) ([]byte, error) {
 	req.Header.Set("Authorization", fmt.Sprintf("bearer %s", tokenString))
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Println("Status code: " + resp.Status)
-	log.Println("Body: " + string(body))
+	log.Println("[DEBUG] OVC response status code: " + resp.Status)
+	log.Println("[DEBUG] OVC response body: " + string(body))
 	switch {
 	case resp.StatusCode == 401:
 		return nil, ErrAuthentication
@@ -84,11 +86,15 @@ func NewClient(c *Config, url string) (*Client, error) {
 		return nil, fmt.Errorf("ClientID, ClientSecret and JWT are provided, please only set ClientID and ClientSecret or JWT")
 	}
 
+	var err error
 	client := &Client{}
 	tokenString := ""
 
 	if c.JWT == "" {
-		tokenString = NewLogin(c)
+		tokenString, err = NewLogin(c)
+		if err != nil {
+			return nil, err
+		}
 	} else {
 		tokenString = c.JWT
 	}
@@ -122,8 +128,7 @@ func NewClient(c *Config, url string) (*Client, error) {
 }
 
 // NewLogin logs into the itsyouonline platform using the comfig struct
-func NewLogin(c *Config) string {
-
+func NewLogin(c *Config) (string, error) {
 	authForm := url.Values{}
 	authForm.Add("grant_type", "client_credentials")
 	authForm.Add("client_id", c.ClientID)
@@ -133,16 +138,24 @@ func NewLogin(c *Config) string {
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	if err != nil {
-		log.Fatal("Error performing login request")
+	if resp != nil {
+		defer resp.Body.Close()
 	}
+	if err != nil {
+		return "", fmt.Errorf("Error fetching JWT: %s", err)
+	}
+
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal("Error reading body")
+		return "", fmt.Errorf("Error reading JWT request body: %s", err)
 	}
-	jwt := string(bodyBytes)
-	defer resp.Body.Close()
-	return jwt
+	bodyStr := string(bodyBytes)
+
+	if resp.StatusCode != 200 {
+		return "", fmt.Errorf("Failed to fetch JWT: %s", bodyStr)
+	}
+
+	return bodyStr, nil
 }
 
 // GetLocation parses the URL to return the location of the API

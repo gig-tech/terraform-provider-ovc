@@ -2,8 +2,7 @@
 account = "<Account Name>"
 
 # IYO client id and client secret.
-client_id = ""
-client_secret = ""
+client_jwt = "<IYO JWT>"
 
 # G8 api url
 server_url= "<Server URL>"
@@ -23,7 +22,4 @@ size_id = 3
 disksize = 10
 
 # The description of the VM
-vm_description = "Meneja K8S"
-
-# User data, contain users and SSH keys to be added to the VM
-userdata = "users: [{name: root, shell: /bin/bash, ssh-authorized-keys: [key1, key2]}]"
+vm_description = "Terraform test VM"

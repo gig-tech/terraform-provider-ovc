@@ -6,6 +6,10 @@ variable "client_secret" {
   description = "Client secret created on itsyou.online"
 }
 
+variable "client_jwt" {
+  description = "JWT created with itsyou.online API app ID and secret"
+}
+
 variable "server_url" {
   description = "API server URL"
 }

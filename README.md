@@ -9,14 +9,12 @@ The OpenvCloud provider is used for interacting with the cloud platform in order
 To build, make sure the project is in your GOPATH and run the following command:
 
 
-```
+```sh
 mkdir -p ~/.terraform.d/plugins
-mkdir -p $GOPATH/src/github.com/gig-tech/terraform-provider-ovc
-git clone git@github.com:gig-tech/terraform-provider-ovc.git $GOPATH/src/github.com/gig-tech/terraform-provider-ovc
-go get -v -u github.com/hashicorp/terraform/terraform
-go get -v -u github.com/gig-tech/ovc-sdk-go/ovc
-cd $GOPATH/src/github.com/gig-tech/terraform-provider-ovc
-go build -o terraform-provider-ovc .
+cd /tmp
+git clone https://github.com/gig-tech/terraform-provider-ovc.git
+cd terraform-provider-ovc
+make build #  This uses go modules and requires go>1.11, if lower install the repo into $GOPATH and run go build
 mv terraform-provider-ovc ~/.terraform.d/plugins
 ```
 

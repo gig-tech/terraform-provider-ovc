@@ -55,6 +55,8 @@ github.com/gig-tech/ovc-sdk-go v0.2.1-0.20190423153113-11cb22b29474 h1:Wr/1tiT+M
 github.com/gig-tech/ovc-sdk-go v0.2.1-0.20190423153113-11cb22b29474/go.mod h1:fJ/X+HOGP/sgapmU4p7emmgxHl9Br0KiLuxpLsyrsbs=
 github.com/gig-tech/ovc-sdk-go v0.2.1-0.20190425074027-136c2b4c4078 h1:ZSdCrxzHIatKgXf/YQk0Urv9/e3tSqa5M7KyvcRukn0=
 github.com/gig-tech/ovc-sdk-go v0.2.1-0.20190425074027-136c2b4c4078/go.mod h1:fJ/X+HOGP/sgapmU4p7emmgxHl9Br0KiLuxpLsyrsbs=
+github.com/gig-tech/ovc-sdk-go v0.2.1-0.20190426132439-7efb4cfc33f2 h1:YdwHD2r/2Os1M0D2JFH1guGxBRnWVoQ5l3VIRhcX7bo=
+github.com/gig-tech/ovc-sdk-go v0.2.1-0.20190426132439-7efb4cfc33f2/go.mod h1:fJ/X+HOGP/sgapmU4p7emmgxHl9Br0KiLuxpLsyrsbs=
 github.com/go-ini/ini v1.25.4 h1:Mujh4R/dH6YL8bxuISne3xX2+qcQ9p0IxKAP6ExWoUo=
 github.com/go-ini/ini v1.25.4/go.mod h1:ByCAeIL28uOIIG0E3PJtZPDL8WnHpFKFOtgjp+3Ies8=
 github.com/go-test/deep v1.0.1 h1:UQhStjbkDClarlmv0am7OXXO4/GaPdCGiUiMTvi28sg=

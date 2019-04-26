@@ -207,18 +207,20 @@ func getIYORefreshedJWT(token string) (string, error) {
 		return "", err
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("bearer %s", token))
-	res, err := client.Do(req)
-	if err != nil {
-		return "", err
+	resp, err := client.Do(req)
+	if resp != nil {
+		defer resp.Body.Close()
 	}
-	defer res.Body.Close()
-
-	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return "", err
 	}
 
-	if res.StatusCode != 200 {
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	if resp.StatusCode != 200 {
 		return "", errors.New(string(body))
 	}
 

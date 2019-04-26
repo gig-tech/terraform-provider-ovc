@@ -12,16 +12,10 @@ data "ovc_cloudspace" "cs" {
   name = "${var.cs_name}"
 }
 
-# Data definition for image
-data "ovc_image" "im"{
-  most_recent = true
-  name_regex = "(?i).*\\.?ubuntu.*16*"
-}
-
 # Definition of the vm to be created with the settings defined in terraform.tfvars
 resource "ovc_machine" "mymachine" {
  cloudspace_id = "${data.ovc_cloudspace.cs.id}"
-  image_id      = "${data.ovc_image.im.image_id}"
+  image_id      = "${var.image_id}"
   size_id       = "${var.size_id}"
   disksize      = "${var.disksize}"
   name          = "mymachine"

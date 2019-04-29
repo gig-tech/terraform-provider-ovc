@@ -17,6 +17,8 @@ But now uses a JWT from [itsyou.online](itsyou.online) to authenticate and uses 
 
 There is also a port forward defined for the machine, forwarding port `2222`  on the public IP of the cloudspace to `22` on the VM.
 
+In [terraform.tfvars](./client-jwt/terraform.tfvars), the `userdata` is given where a user `Carmichael` is defined to be created with a public key to be added to `Carmichael`'s authorized_keys file.
+
 ## [multiple-disks](./multiple-disks)
 
 This is an example on how to set up a VM with a boot disk and 2 additional data disks attached to the VM.

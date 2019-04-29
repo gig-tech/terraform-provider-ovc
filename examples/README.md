@@ -20,5 +20,7 @@ There is also a port forward defined for the machine, forwarding port `2222`  on
 ## [multiple-disks](./multiple-disks)
 
 This is an example on how to set up a VM with a boot disk and 2 additional data disks attached to the VM.
+  
+Disk resources do not support the `count` parameter, therefor each disk should be defined on it's own. 
 
 Authentication credentials are not defined in the example, instead this example relies on setting the correct environmental variables described in this projects main README under [Authentication](../README.md#Authentication).

@@ -19,3 +19,6 @@ disksize = 10
 
 # The description of the VM
 vm_description = "Terraform test VM"
+
+# User data to be added to the VM 
+userdata = "users: [{name: Carmichael, shell: /bin/bash, ssh-authorized-keys: [<public key to be added to the VM's authorized_keys>]}]"

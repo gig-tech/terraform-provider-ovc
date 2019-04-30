@@ -198,7 +198,15 @@ func resourceOvcMachineCreate(d *schema.ResourceData, m interface{}) error {
 	// Set IOPS boot disk
 	iops := d.Get("iops")
 	if iops != nil {
-		err := updateIOPS(client, d, iops.(int))
+		bootDiskID, err := GetBootDiskID(client, machineID)
+		if err != nil {
+			return err
+		}
+		diskConfig := &ovc.DiskConfig{
+			DiskID: bootDiskID,
+			IOPS:   iops.(int),
+		}
+		err = client.Disks.Update(diskConfig)
 		if err != nil {
 			return err
 		}
@@ -232,13 +240,25 @@ func resourceOvcMachineUpdate(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	if d.HasChange("iops") {
-		iops := d.Get("iops")
-		if iops != nil {
-			err := updateIOPS(client, d, iops.(int))
-			if err != nil {
-				return err
-			}
+	if d.HasChange("iops") || d.HasChange("disksize") {
+		bootDiskID, err := GetBootDiskID(client, d.Id())
+		if err != nil {
+			return err
+		}
+
+		log.Println("[DEBUG] Updating machine boot disk")
+		diskConfig := &ovc.DiskConfig{
+			DiskID: bootDiskID,
+		}
+		if d.HasChange("iops") {
+			diskConfig.IOPS = d.Get("iops").(int)
+		}
+		if d.HasChange("disksize") {
+			diskConfig.Size = d.Get("disksize").(int)
+		}
+		err = client.Disks.Update(diskConfig)
+		if err != nil {
+			return err
 		}
 	}
 
@@ -277,28 +297,16 @@ func flattenDisks(machineInfo *ovc.MachineInfo) []map[string]interface{} {
 	return result
 }
 
-func updateIOPS(client *ovc.Client, d *schema.ResourceData, iops int) error {
-	machineInfo, err := client.Machines.Get(d.Id())
+// GetBootDiskID gets ID of the boot disk of the machine
+func GetBootDiskID(client *ovc.Client, id string) (int, error) {
+	machineInfo, err := client.Machines.Get(id)
 	if err != nil {
-		return err
+		return 0, err
 	}
-
-	log.Println("[DEBUG] Setting machine IOPS")
 	for _, disk := range machineInfo.Disks {
 		if disk.Type == "B" {
-			log.Println("[DEBUG] Boot disk found")
-			diskConfig := &ovc.DiskConfig{
-				DiskID: disk.ID,
-				IOPS:   iops,
-			}
-
-			err = client.Disks.Update(diskConfig)
-			if err != nil {
-				return err
-			}
-
+			return disk.ID, nil
 		}
 	}
-
-	return nil
+	return 0, fmt.Errorf("Machine %s has no boot disk", machineInfo.Name)
 }

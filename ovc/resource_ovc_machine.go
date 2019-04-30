@@ -198,7 +198,15 @@ func resourceOvcMachineCreate(d *schema.ResourceData, m interface{}) error {
 	// Set IOPS boot disk
 	iops := d.Get("iops")
 	if iops != nil {
-		err := updateIOPS(client, d, iops.(int))
+		bootDiskID, err := GetBootDiskID(client, machineID)
+		if err != nil {
+			return err
+		}
+		diskConfig := &ovc.DiskConfig{
+			DiskID: bootDiskID,
+			IOPS:   iops.(int),
+		}
+		err = client.Disks.Update(diskConfig)
 		if err != nil {
 			return err
 		}
@@ -232,23 +240,25 @@ func resourceOvcMachineUpdate(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	if d.HasChange("iops") {
-		iops := d.Get("iops")
-		if iops != nil {
-			err := updateIOPS(client, d, iops.(int))
-			if err != nil {
-				return err
-			}
+	if d.HasChange("iops") || d.HasChange("disksize") {
+		bootDiskID, err := GetBootDiskID(client, d.Id())
+		if err != nil {
+			return err
 		}
-	}
 
-	if d.HasChange("disksize") {
-		disksize := d.Get("disksize")
-		if disksize != nil {
-			err := resizeBootDisk(client, d, disksize.(int))
-			if err != nil {
-				return err
-			}
+		log.Println("[DEBUG] Updating machine boot disk")
+		diskConfig := &ovc.DiskConfig{
+			DiskID: bootDiskID,
+		}
+		if d.HasChange("iops") {
+			diskConfig.IOPS = d.Get("iops").(int)
+		}
+		if d.HasChange("disksize") {
+			diskConfig.Size = d.Get("disksize").(int)
+		}
+		err = client.Disks.Update(diskConfig)
+		if err != nil {
+			return err
 		}
 	}
 
@@ -299,44 +309,4 @@ func GetBootDiskID(client *ovc.Client, id string) (int, error) {
 		}
 	}
 	return 0, fmt.Errorf("Machine %s has no boot disk", machineInfo.Name)
-}
-
-func updateIOPS(client *ovc.Client, d *schema.ResourceData, iops int) error {
-	bootDiskID, err := GetBootDiskID(client, d.Id())
-	if err != nil {
-		return err
-	}
-
-	log.Println("[DEBUG] Setting machine IOPS")
-	diskConfig := &ovc.DiskConfig{
-		DiskID: bootDiskID,
-		IOPS:   iops,
-	}
-
-	err = client.Disks.Update(diskConfig)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func resizeBootDisk(client *ovc.Client, d *schema.ResourceData, disksize int) error {
-	bootDiskID, err := GetBootDiskID(client, d.Id())
-	if err != nil {
-		return err
-	}
-
-	log.Println("[DEBUG] Setting machine boot disk size")
-	diskConfig := &ovc.DiskConfig{
-		DiskID: bootDiskID,
-		Size:   disksize,
-	}
-
-	err = client.Disks.Resize(diskConfig)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

@@ -48,7 +48,6 @@ The following arguments are supported:
 * name - (Required) Name of the machine
 * description - (Optional) Description of the machine
 
-
 ## Resource: ovc_disk
 
 Creates extra disks used by ovc machines
@@ -67,16 +66,28 @@ resource "ovc_machine" "machine" {
   description = "Machine Provisioned With Terraform"
 }
 
-resource "ovc_disk" "disk" {
+resource "ovc_disk" "disk1" {
   machine_id = "${ovc_machine.machine.id}"
   disk_name = "terraform_disk"
   description = "Disk created by terraform"
   size = 10
   type = "D"
-  ssd_size = 10
-  iops = 2000
+  iops = 1000
+}
+
+resource "ovc_disk" "disk2" {
+  machine_id = "${ovc_machine.machine.id}"
+  disk_name = "terraform_disk"
+  description = "Disk created by terraform"
+  size = 15
+  type = "D"
+  iops = 1500
+  depends_on = ["ovc_disk.disk1"]
 }
 ```
+
+For creating several disks add resource construct for each disk separately, add dependency between disks to create them sequentially.
+Terraform allows creating multiple objects with attribute `count`, but in this case it is not allowed, since OVC supports only adding one disks to a VM at a time.
 
 ### Argument Reference
 
@@ -86,8 +97,7 @@ The following arguments are supported:
 * disk_name - (Required) Disk name of the disk
 * description - (Required) Disk description
 * size - (Required) Size in gigabytes of the disk
-* type - (Required) Type of disk, following options are supported: B (Boot), D (Data), T (Temp)
-* ssdSize - (Optional) Size in gigabytes of the ssd disk
+* type - (Required) Type of disk, following options are supported: B (Boot), D (Data)
 * iops - (Optional) Maximum IOPS disk can perform, defaults to 2000
 
 ## Resource: ovc_port_forwarding

@@ -1,5 +1,6 @@
 provider "ovc" {
   server_url = "${var.server_url}"
+  client_jwt = "${var.client_jwt}"
 }
 
 data "ovc_cloudspace" "cs" {

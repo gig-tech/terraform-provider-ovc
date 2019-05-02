@@ -4,6 +4,8 @@
 
 The OpenvCloud provider is used for interacting with the cloud platform in order to create the desired resources. The provider needs to be configured with credentials.
 
+[Tutorial for OVC Provider is available here.](https://gig.tech/howtos/automated-deployment-with-terrafform)
+
 ## Build
 
 To build, make sure the project is in your GOPATH and run the following command:

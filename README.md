@@ -45,11 +45,11 @@ arguments:
 It is advisable to set these arguments as environment variables:
 
 ```
-export OPENVCLOUD_SERVER_URL="server-url"
-export ITSYOU_ONLINE_CLIENT_ID="your-client-id"
-export ITSYOU_ONLINE_CLIENT_SECRET="your-client-secret"
+export TF_VAR_server_url="https://your-g8"
+export TF_VAR_client_id="your-client-id"
+export TF_VAR_client_secret="your-client-secret"
 ```
-This way the arguments must not be included in your terraform configuration file.
+This way the arguments must not be included in your `terraform.tfvars` configuration file.
 
 An example can be found under [examples/client-id-secret](./examples/client-id-secret)
 
@@ -59,8 +59,10 @@ The following command is an example how to get a JWT using the `curl` command.
 Providing `scope=offline_access` will return a JWT that is refreshable.
 
 ```sh
-JWT=$(curl --silent -d 'grant_type=client_credentials&client_id='"$CLIENT_ID"'&client_secret='"$CLIENT_SECRET"'&response_type=id_token&scope=offline_access' https://itsyou.online/v1/oauth/access_token)
-echo $JWT
+CLIENT_ID=<your-client-id>
+CLIENT_SECRET=<your-client-secret>
+TF_VAR_client_jwt=$(curl --silent -d 'grant_type=client_credentials&client_id='"$CLIENT_ID"'&client_secret='"$CLIENT_SECRET"'&response_type=id_token&scope=offline_access' https://itsyou.online/v0/oauth/access_token)
+echo $TF_VAR_client_jwt
 
 By configuration the following parameters you will configure the ovc provider to authenticate
 with the JWT

@@ -1,11 +1,3 @@
-variable "client_id" {
-  description = "Client ID created on itsyou.online"
-}
-
-variable "client_secret" {
-  description = "Client secret created on itsyou.online"
-}
-
 variable "client_jwt" {
   description = "JWT created with itsyou.online API app ID and secret"
 }

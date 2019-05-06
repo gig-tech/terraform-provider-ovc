@@ -27,7 +27,7 @@ jobs:
       deploy:
         provider: releases
         api_key: 
-          secure: "UJVeky9S4dOo4KqHtegOkJRxUlbgOs8owtoa+aOce5oY1HLgVHEUGGAU0+9G6e1awamr77o0EUhgwm+ut6HurPz7yIf47EfUtfkkPbINaxNEyOxO3Nj3xEVr6Ziwh9ydimx6xhufJE/WCZBsuWpsREZxxq5dLYq7RQKYMmJ7xUDg4rE3Zle3QNTkRBdFbwoK39s6UKd/vBDZJ/sf+H8gsL97MEtJzfkZgGmU4Wu5A/7MGaw4qcneEqWCoykOrmTy7HSay/XnlNHdPPPYBtUVszWmTWWxHE+ZEgMbZDZm5h1YU8f3x2SDbQ9iy1PnWhHLbFuTrD7M7ZPFF/jcFRXwGn/VpAmiE/F0UBDuKbTVxHDJcTOQc+iS+bP9NayykUwjeoThfUnFT76XqBsiVjQiJzN1U1HtPQqffGo94NxQgNCy6hTpZjiqXDoZeoyr4DgscjU0RmlFqrLr1eN4S4AN2UMvLfL/iKw5amUTW/HbQxAhFfMtVTlNaw8GFKdAaYf8BnRmKq5Uuz/Pedzl1PXljDCiIdf7Gt8qBX6T9PIcBUH3WNkE0rAlBWehmmQX1Gy7/2goDNbFHuxAzc15xyTCnxkIfmYFm+DgbJAq6fsTELIDTYMNc/Mk7K16NjwMpveUcvdLHdfuJgpmsil8dXcKnq3EOEkqiGhcYN/brPtYeZY="
+          secure: "xMiXl3h8VtbIV2kXDbzWVKXzNZIJqVLCqmXiNbsmGMH5mfYYs7GkWC4CqngCz24E+3GO4e7yvpxbpitcq801IgYKC/kLcMXdvnGGTGlRHYqHkonme+U+0A3WdMEmY+lHJfsRgHpMmpzcsCqBz6PKkhCfEa6T8+HVaphpayCMXH42OYrafQ0n/kZp0d90sHU/dNDYLqxycHXKc6HICnXhbLaWbItZkN03vykYmk5b3wFeOoWN6WX9r1JIwlR+H6DBPs+YbuJDR/mnzwTIlrXWWmJAvpafxqT/y2RBwE/VgiSME69o4tDqm455cQ6uY8AOnFVjZYHlcowg99hll1fm91fgnUYMKeKeWITGwqYb4hXHbq6xsLyCkRQXkf6O1KBn+Xwjp3hYq7rjj6fhuHKQPWh9hSOcxYR/BGyj60jlY4RkzPasHvSQdhSecrUOZXLIC66OMLkHrtxoZu0b+G7ePlsPv8HCDgWLjNcWDhzn7uFQFP8OYARVtYAbrsqd88+ytieomB5cZPBUE6fihPaTv3GwzC/RTzDINRa9JnCo78fyX14w+DEasVz102yU6ysDtytQZtWnhPkXF2nySdYcJCmrbUhaFfzhp7WZrEGaEDw8yX/NImC4zTt/F9nN0svdicOTQ8jPxYHAar0f+ZNXhpj7Ie/Nnj8Yuty9zObkoa0="
         file:
           - terraform-provider-ovc_$(git describe --tags --abbrev=0)-linux
           - terraform-provider-ovc_$(git describe --tags --abbrev=0)-mac

@@ -113,6 +113,7 @@ func dataSourceOvcCloudSpaceRead(d *schema.ResourceData, m interface{}) error {
 	}
 	d.Set("description", cloudSpace.Description)
 	d.Set("external_network_ip", cloudSpace.Externalnetworkip)
+	d.Set("private_network", cloudSpace.PrivateNetwork)
 	d.Set("location", cloudSpace.Location)
 	d.SetId(strconv.Itoa(cloudSpace.ID))
 	return nil

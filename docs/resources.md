@@ -193,3 +193,56 @@ echo $accounts_json | jq -r 'map(select(any(.name; contains($account_name)))|.id
   * `max_cpu_capacity` - (Optional) max number of cpu cores
   * `max_num_public_ip` - (Optional) max number of assigned public IPs
   * `max_network_peer_transfer` - (Optional) max sent/received network transfer peering
+
+## Resource: ovc_ipsec
+
+Manages port forwarding
+
+### Example Usage
+
+```hcl
+provider "ovc" {
+  server_url = "${var.server_url}"
+  client_jwt="${var.client_jwt}"
+}
+resource "ovc_cloudspace" "cs" {
+  account = "${var.account}"
+  name = "${var.cloudspace1}"
+  private_network = "192.168.103.0/24"
+}
+resource "ovc_cloudspace" "cst" {
+  account = "${var.account}"
+  name = "${var.cloudspace2}"
+  private_network = "192.168.104.0/24"
+}
+data "ovc_cloudspace" "cs" {
+  account = "${var.account}"
+  name = "${var.cloudspace1}"
+  depends_on = ["ovc_cloudspace.cs"]
+}
+data "ovc_cloudspace" "cst" {
+  account = "${var.account}"
+  name = "${var.cloudspace2}"
+  depends_on = ["ovc_cloudspace.cst"]
+}
+resource "ovc_ipsec" "tunnel1" {
+  cloudspace_id = "${ovc_cloudspace.cs.id}"
+  remote_public_ip = "${data.ovc_cloudspace.cst.external_network_ip}"
+  remote_private_network = "${data.ovc_cloudspace.cst.private_network}"
+  depends_on = ["ovc_cloudspace.cs", "ovc_cloudspace.cst"]
+}
+resource "ovc_ipsec" "tunnel2" {
+  cloudspace_id = "${ovc_cloudspace.cst.id}"
+  remote_public_ip = "${data.ovc_cloudspace.cs.external_network_ip}"
+  remote_private_network = "${data.ovc_cloudspace.cs.private_network}"
+  psk = "${ovc_ipsec.tunnel1.psk}"
+  depends_on = ["ovc_cloudspace.cs", "ovc_cloudspace.cst", "ovc_ipsec.tunnel1"]
+
+```
+
+### Argument Reference
+
+* cloudspace_id - (Required) ID of the cloudspace
+* remote_public_ip - (Required) public ip of the cloudspace to connect to
+* remote_private_network - (Required) remote private network to connect to
+* psk - (Optional) Pre shared secret for the connection's authentication

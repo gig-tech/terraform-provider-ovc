@@ -81,8 +81,5 @@ func resourceIpsecDelete(d *schema.ResourceData, m interface{}) error {
 	ipsecConfig.RemotePublicAddr = d.Get("remote_public_ip").(string)
 	ipsecConfig.RemotePrivateNetwork = d.Get("remote_private_network").(string)
 	err := client.Ipsec.Delete(&ipsecConfig)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }

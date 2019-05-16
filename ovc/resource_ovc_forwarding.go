@@ -160,8 +160,5 @@ func resourcePortForwardingDelete(d *schema.ResourceData, m interface{}) error {
 	portForwardingConfig.PublicPort = d.Get("public_port").(int)
 	portForwardingConfig.Protocol = d.Get("protocol").(string)
 	err := client.Portforwards.Delete(&portForwardingConfig)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }

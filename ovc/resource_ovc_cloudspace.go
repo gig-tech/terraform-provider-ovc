@@ -278,8 +278,5 @@ func resourceOvcCloudSpaceDelete(d *schema.ResourceData, m interface{}) error {
 	}
 	cloudSpaceConfig.Permanently = true
 	err = client.CloudSpaces.Delete(&cloudSpaceConfig)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }

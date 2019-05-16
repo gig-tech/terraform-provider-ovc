@@ -271,10 +271,7 @@ func resourceOvcMachineDelete(d *schema.ResourceData, m interface{}) error {
 	machineConfig.MachineID = d.Id()
 	machineConfig.Permanently = true
 	err := client.Machines.Delete(&machineConfig)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func flattenDisks(machineInfo *ovc.MachineInfo) []map[string]interface{} {

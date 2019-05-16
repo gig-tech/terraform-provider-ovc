@@ -102,8 +102,5 @@ func resourceOvcDiskDelete(d *schema.ResourceData, m interface{}) error {
 	diskConfig.Detach = true
 	diskConfig.Permanently = true
 	err = client.Disks.Delete(&diskConfig)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }

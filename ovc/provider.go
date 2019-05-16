@@ -55,6 +55,7 @@ func Provider() *schema.Provider {
 			"ovc_port_forwarding": resourcePortForwarding(),
 			"ovc_disk":            resourceOvcDisk(),
 			"ovc_cloudspace":      resourceOvcCloudSpace(),
+			"ovc_ipsec":           resourceIpsec(),
 		},
 
 		ConfigureFunc: providerConfigure,

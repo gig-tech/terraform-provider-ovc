@@ -7,13 +7,13 @@ WEBSITE_REPO=github.com/hashicorp/terraform-website
 default: build
 
 build: fmtcheck
-	GO111MODULE=on go build -mod vendor ${BUILDARGS}
+	CGO_ENABLED=0 GO111MODULE=on go build -mod vendor ${BUILDARGS}
 
 build-linux: fmtcheck
-	GO111MODULE=on GOOS=linux GOARCH=amd64 go build -mod vendor ${BUILDARGS} .
+	CGO_ENABLED=0 GO111MODULE=on GOOS=linux GOARCH=amd64 go build -mod vendor ${BUILDARGS} .
 	
 build-darwin: fmtcheck
-	GO111MODULE=on GOOS=darwin GOARCH=amd64 go build -mod vendor ${BUILDARGS} .
+	CGO_ENABLED=0 GO111MODULE=on GOOS=darwin GOARCH=amd64 go build -mod vendor ${BUILDARGS} .
 
 install: fmtcheck
 	GO111MODULE=on go install -mod vendor

@@ -65,12 +65,11 @@ CLIENT_ID=<your-client-id>
 CLIENT_SECRET=<your-client-secret>
 TF_VAR_client_jwt=$(curl --silent -d 'grant_type=client_credentials&client_id='"$CLIENT_ID"'&client_secret='"$CLIENT_SECRET"'&response_type=id_token&scope=offline_access' https://itsyou.online/v0/oauth/access_token)
 echo $TF_VAR_client_jwt
-
-By configuration the following parameters you will configure the ovc provider to authenticate
-with the JWT
 ```
+By configuration the following parameters you will configure the ovc provider to authenticate
+with the JWT.
+
 * server_url - (Required) The server url of the ovc api to connect to
 * client_jwt - (Required) the JWT that is tied to your client_id and client_secret
-```
 
 An example can be found under [examples/client-jwt](./examples/client-jwt)

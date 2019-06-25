@@ -54,6 +54,7 @@ func resourceOvcDiskExists(d *schema.ResourceData, m interface{}) (bool, error) 
 	if err != nil || disk.Status == "DESTROYED" {
 		return false, nil
 	}
+
 	return true, nil
 }
 
@@ -65,6 +66,7 @@ func resourceOvcDiskRead(d *schema.ResourceData, m interface{}) error {
 		d.SetId("")
 		return nil
 	}
+
 	return nil
 }
 
@@ -83,12 +85,38 @@ func resourceOvcDiskCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	d.SetId(diskID)
-	return resourceOvcDiskRead(d, m)
 
+	return resourceOvcDiskRead(d, m)
 }
 
 func resourceOvcDiskUpdate(d *schema.ResourceData, m interface{}) error {
-	return resourceOvcDiskRead(d, m)
+	client := m.(*ovc.Client)
+	diskConfig := ovc.DiskConfig{}
+	update := false
+	diskID, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return err
+	}
+	diskConfig.DiskID = diskID
+
+	if d.HasChange("size") {
+		diskConfig.Size = d.Get("size").(int)
+		update = true
+	}
+
+	if d.HasChange("iops") {
+		diskConfig.IOPS = d.Get("iops").(int)
+		update = true
+	}
+
+	if update {
+		err = client.Disks.Update(&diskConfig)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func resourceOvcDiskDelete(d *schema.ResourceData, m interface{}) error {
@@ -102,5 +130,6 @@ func resourceOvcDiskDelete(d *schema.ResourceData, m interface{}) error {
 	diskConfig.Detach = true
 	diskConfig.Permanently = true
 	err = client.Disks.Delete(&diskConfig)
+
 	return err
 }

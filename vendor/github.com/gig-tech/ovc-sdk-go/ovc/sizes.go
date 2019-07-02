@@ -30,7 +30,6 @@ type Size struct {
 
 // SizesService is an interface for interfacing with the Sizes
 // endpoints of the OVC API
-// See: https://ch-lug-dc01-001.gig.tech/g8vdc/#/ApiDocs
 type SizesService interface {
 	List(string) (*SizesList, error)
 	GetByVcpusAndMemory(int, int, string) (*Size, error)
@@ -41,8 +40,6 @@ type SizesService interface {
 type SizesServiceOp struct {
 	client *Client
 }
-
-var _ SizesService = &SizesServiceOp{}
 
 // List all sizes
 func (s *SizesServiceOp) List(cloudspaceID string) (*SizesList, error) {
@@ -60,11 +57,12 @@ func (s *SizesServiceOp) List(cloudspaceID string) (*SizesList, error) {
 	if err != nil {
 		return nil, err
 	}
-	var sizes = new(SizesList)
+	sizes := new(SizesList)
 	err = json.Unmarshal(body, &sizes)
 	if err != nil {
 		return nil, err
 	}
+
 	return sizes, nil
 }
 
@@ -74,12 +72,13 @@ func (s *SizesServiceOp) GetByVcpusAndMemory(vcpus int, memory int, cloudspaceID
 	if err != nil {
 		return nil, err
 	}
-	var size = new(Size)
+	size := new(Size)
 	for _, sz := range *sizes {
 		if sz.Vcpus == vcpus && sz.Memory == memory {
 			*size = sz
 			return size, nil
 		}
 	}
+
 	return nil, errors.New("Could not find sizes")
 }

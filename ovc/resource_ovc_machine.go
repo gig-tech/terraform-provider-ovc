@@ -341,7 +341,7 @@ func resourceOvcMachineUpdate(d *schema.ResourceData, m interface{}) error {
 							if err := client.Machines.DeleteExternalIP(machineIDInt, networkID, ips[0]); err != nil {
 								return err
 							}
-							ips = ips[1:len(ips)]
+							ips = ips[1:]
 						}
 					}
 				}

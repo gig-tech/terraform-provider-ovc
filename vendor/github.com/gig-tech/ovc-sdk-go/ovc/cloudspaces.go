@@ -22,6 +22,9 @@ type CloudSpaceConfig struct {
 	MaxNumPublicIP         int     `json:"maxNumPublicIP,omitempty"`
 	AllowedVMSizes         []int   `json:"allowedVMSizes,omitempty"`
 	PrivateNetwork         string  `json:"privatenetwork"`
+	Mode                   string  `json:"mode"`
+	Type                   string  `json:"type"`
+	ExternalnetworkID      int     `json:"externalnetworkId"`
 }
 
 // ResourceLimits contains all information related to resource limits
@@ -52,10 +55,12 @@ type CloudSpace struct {
 		UserGroupID  string `json:"userGroupId"`
 	} `json:"acl"`
 	Secret          string `json:"secret"`
-	Gid             int    `json:"gid"`
+	GridID          int    `json:"gid"`
 	Location        string `json:"location"`
 	Publicipaddress string `json:"publicipaddress"`
 	PrivateNetwork  string `json:"privatenetwork"`
+	Type            string `json:"type"`
+	Mode            string `json:"mode"`
 }
 
 // CloudSpaceList returns a list of CloudSpaces
@@ -81,7 +86,7 @@ type CloudSpaceList []struct {
 		GUID        string `json:"guid"`
 		Type        string `json:"type"`
 	} `json:"accountAcl"`
-	Gid             int    `json:"gid"`
+	GridID          int    `json:"gid"`
 	Location        string `json:"location"`
 	Publicipaddress string `json:"publicipaddress"`
 	AccountName     string `json:"accountName"`
@@ -97,7 +102,6 @@ type CloudSpaceDeleteConfig struct {
 
 // CloudSpaceService is an interface for interfacing with the CloudSpace
 // endpoints of the OVC API
-// See: https://ch-lug-dc01-001.gig.tech/g8vdc/#/ApiDocs
 type CloudSpaceService interface {
 	List() (*CloudSpaceList, error)
 	Get(string) (*CloudSpace, error)
@@ -112,8 +116,6 @@ type CloudSpaceService interface {
 type CloudSpaceServiceOp struct {
 	client *Client
 }
-
-var _ CloudSpaceService = &CloudSpaceServiceOp{}
 
 // List returns all cloudspaces
 func (s *CloudSpaceServiceOp) List() (*CloudSpaceList, error) {
@@ -131,11 +133,12 @@ func (s *CloudSpaceServiceOp) List() (*CloudSpaceList, error) {
 	if err != nil {
 		return nil, err
 	}
-	var cloudSpaces = new(CloudSpaceList)
+	cloudSpaces := new(CloudSpaceList)
 	err = json.Unmarshal(body, &cloudSpaces)
 	if err != nil {
 		return nil, err
 	}
+
 	return cloudSpaces, nil
 }
 
@@ -160,13 +163,13 @@ func (s *CloudSpaceServiceOp) Get(cloudSpaceID string) (*CloudSpace, error) {
 	if err != nil {
 		return nil, err
 	}
-	var cloudSpace = new(CloudSpace)
+	cloudSpace := new(CloudSpace)
 	err = json.Unmarshal(body, &cloudSpace)
 	if err != nil {
 		return nil, err
 	}
-	return cloudSpace, nil
 
+	return cloudSpace, nil
 }
 
 // GetByNameAndAccount gets an individual cloudspace
@@ -181,6 +184,7 @@ func (s *CloudSpaceServiceOp) GetByNameAndAccount(cloudSpaceName string, account
 			return s.client.CloudSpaces.Get(cid)
 		}
 	}
+
 	return nil, errors.New("Could not find cloudspace based on name")
 }
 
@@ -198,6 +202,7 @@ func (s *CloudSpaceServiceOp) Create(cloudSpaceConfig *CloudSpaceConfig) (string
 	if err != nil {
 		return "", err
 	}
+
 	return string(body), nil
 }
 
@@ -212,10 +217,8 @@ func (s *CloudSpaceServiceOp) Delete(cloudSpaceConfig *CloudSpaceDeleteConfig) e
 		return err
 	}
 	_, err = s.client.Do(req)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return err
 }
 
 // Update an existing CloudSpace
@@ -229,8 +232,6 @@ func (s *CloudSpaceServiceOp) Update(cloudSpaceConfig *CloudSpaceConfig) error {
 		return err
 	}
 	_, err = s.client.Do(req)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return err
 }

@@ -31,13 +31,10 @@ type AccountList []struct {
 
 // AccountService is an interface for interfacing with the Account
 // endpoints of the OVC API
-// See: https://ch-lug-dc01-001.gig.tech/g8vdc/#/ApiDocs
 type AccountService interface {
 	GetIDByName(string) (int, error)
 	List() (*AccountList, error)
 }
-
-var _ AccountService = &AccountServiceOp{}
 
 // AccountServiceOp handles communication with the account related methods of the
 // OVC API
@@ -47,7 +44,7 @@ type AccountServiceOp struct {
 
 // GetIDByName returns the account ID based on the account name
 func (s *AccountServiceOp) GetIDByName(account string) (int, error) {
-	var accounts, err = s.List()
+	accounts, err := s.List()
 	if err != nil {
 		return 0, err
 	}
@@ -56,6 +53,7 @@ func (s *AccountServiceOp) GetIDByName(account string) (int, error) {
 			return acc.ID, nil
 		}
 	}
+
 	return -1, errors.New("Account not found")
 }
 
@@ -69,10 +67,12 @@ func (s *AccountServiceOp) List() (*AccountList, error) {
 	if err != nil {
 		return nil, err
 	}
-	var accounts = new(AccountList)
+
+	accounts := new(AccountList)
 	err = json.Unmarshal(body, &accounts)
 	if err != nil {
 		return nil, err
 	}
+
 	return accounts, nil
 }

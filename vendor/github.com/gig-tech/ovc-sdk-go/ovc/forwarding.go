@@ -51,7 +51,6 @@ type PortForwardingInfo struct {
 
 // ForwardingService is an interface for interfacing with the portforwards
 // endpoints of the OVC API
-// See: https://ch-lug-dc01-001.gig.tech/g8vdc/#/ApiDocs
 type ForwardingService interface {
 	Create(*PortForwardingConfig) (int, error)
 	List(*PortForwardingConfig) (*PortForwardingList, error)
@@ -66,8 +65,6 @@ type ForwardingService interface {
 type ForwardingServiceOp struct {
 	client *Client
 }
-
-var _ ForwardingService = &ForwardingServiceOp{}
 
 // Get a portforward based on ID
 func (s *ForwardingServiceOp) Get(portForwardingConfig *PortForwardingConfig) (*PortForwardingInfo, error) {
@@ -89,6 +86,7 @@ func (s *ForwardingServiceOp) Get(portForwardingConfig *PortForwardingConfig) (*
 			}, nil
 		}
 	}
+
 	return nil, fmt.Errorf("Could not find a portforward with publicport %v", portForwardingConfig.PublicPort)
 }
 
@@ -109,6 +107,7 @@ func (s *ForwardingServiceOp) Create(portForwardingConfig *PortForwardingConfig)
 	if err != nil {
 		return 0, err
 	}
+
 	return portForwardingConfig.PublicPort, nil
 }
 
@@ -123,10 +122,8 @@ func (s *ForwardingServiceOp) Update(portForwardingConfig *PortForwardingConfig)
 		return err
 	}
 	_, err = s.client.Do(req)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return err
 }
 
 // Delete an existing portforward
@@ -140,10 +137,8 @@ func (s *ForwardingServiceOp) Delete(portForwardingConfig *PortForwardingConfig)
 		return err
 	}
 	_, err = s.client.Do(req)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return err
 }
 
 // List all portforwards
@@ -160,11 +155,12 @@ func (s *ForwardingServiceOp) List(portForwardingConfig *PortForwardingConfig) (
 	if err != nil {
 		return nil, err
 	}
-	var portForwardingList = new(PortForwardingList)
+	portForwardingList := new(PortForwardingList)
 	err = json.Unmarshal(body, &portForwardingList)
 	if err != nil {
 		return nil, err
 	}
+
 	return portForwardingList, nil
 }
 
@@ -183,10 +179,8 @@ func (s *ForwardingServiceOp) DeleteByPort(publicPort int, publicIP string, clou
 		return err
 	}
 	_, err = s.client.Do(req)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return err
 }
 
 func (s *ForwardingServiceOp) getRandomPublicPort(portForwardingConfig *PortForwardingConfig) int {
@@ -196,6 +190,7 @@ func (s *ForwardingServiceOp) getRandomPublicPort(portForwardingConfig *PortForw
 	for s.hasPublicPort(portForwardingConfig, randInt) {
 		randInt = rand.Intn(40000) + 2000
 	}
+
 	return randInt
 }
 
@@ -212,5 +207,6 @@ func (s *ForwardingServiceOp) hasPublicPort(portForwardingConfig *PortForwarding
 			return true
 		}
 	}
+
 	return false
 }

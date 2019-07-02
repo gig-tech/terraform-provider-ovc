@@ -61,7 +61,6 @@ func dataSourceOvcImageRead(d *schema.ResourceData, m interface{}) error {
 	nameRegex := d.Get("name_regex").(string)
 	re := regexp.MustCompile(nameRegex)
 
-	// var filteredImages []*ovc.Image
 	filteredImages := make([]ovc.ImageInfo, 0)
 
 	for _, image := range *images {

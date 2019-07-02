@@ -39,15 +39,17 @@ func Provider() *schema.Provider {
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"ovc_machine":         dataSourceOvcMachine(),
-			"ovc_cloudspace":      dataSourceOvcCloudSpace(),
-			"ovc_sizes":           dataSourceOvcSizes(),
-			"ovc_disk":            dataSourceOvcDisk(),
-			"ovc_cloudspaces":     dataSourceOvcCloudSpaces(),
-			"ovc_machines":        dataSourceOvcMachines(),
-			"ovc_port_forwarding": dataSourceOvcPortForwarding(),
-			"ovc_images":          dataSourceOvcImages(),
-			"ovc_image":           dataSourceOvcImage(),
+			"ovc_machine":           dataSourceOvcMachine(),
+			"ovc_machines":          dataSourceOvcMachines(),
+			"ovc_cloudspace":        dataSourceOvcCloudSpace(),
+			"ovc_cloudspaces":       dataSourceOvcCloudSpaces(),
+			"ovc_sizes":             dataSourceOvcSizes(),
+			"ovc_disk":              dataSourceOvcDisk(),
+			"ovc_port_forwarding":   dataSourceOvcPortForwarding(),
+			"ovc_image":             dataSourceOvcImage(),
+			"ovc_images":            dataSourceOvcImages(),
+			"ovc_external_network":  dataSourceOvcExternalNetwork(),
+			"ovc_external_networks": dataSourceOvcExternalNetworks(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{

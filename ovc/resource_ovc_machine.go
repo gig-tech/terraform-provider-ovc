@@ -3,6 +3,7 @@ package ovc
 import (
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/gig-tech/ovc-sdk-go/ovc"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -98,6 +99,23 @@ func resourceOvcMachine() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"interfaces": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"network_id": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							Computed: true,
+						},
+						"ip_address": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
 			"disks": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -167,10 +185,11 @@ func resourceOvcMachineRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("memory", machineInfo.Memory)
 	d.Set("name", machineInfo.Name)
 	d.Set("description", machineInfo.Description)
-	d.Set("cloudspace_id", machineInfo.Cloudspaceid)
-	d.Set("size_id", machineInfo.Sizeid)
+	d.Set("cloudspace_id", machineInfo.CloudspaceID)
+	d.Set("size_id", machineInfo.SizeID)
 	d.Set("vcpus", machineInfo.Vcpus)
 	d.Set("disks", flattenDisks(machineInfo))
+	d.Set("interfaces", flattenNics(machineInfo))
 
 	return nil
 }
@@ -194,7 +213,10 @@ func resourceOvcMachineCreate(d *schema.ResourceData, m interface{}) error {
 	log.Println("[DEBUG] New machine ID: " + machineID)
 	d.SetId(machineID)
 	log.Println("[DEBUG] Resource machine ID: " + d.Id())
-
+	machineIDInt, err := strconv.Atoi(machineID)
+	if err != nil {
+		return err
+	}
 	// Set IOPS boot disk
 	iops := d.Get("iops")
 	if iops != nil {
@@ -211,7 +233,23 @@ func resourceOvcMachineCreate(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
-
+	// attach to external networks
+	if v, ok := d.GetOk("interfaces"); ok {
+		nics := v.([]interface{})
+		for _, nici := range nics {
+			var networkID int
+			if nici != nil {
+				nic := nici.(map[string]interface{})
+				if nic["network_id"] != nil {
+					// if network ID is given, attach to this network
+					networkID = nic["network_id"].(int)
+				}
+			}
+			if err := client.Machines.AddExternalIP(machineIDInt, networkID); err != nil {
+				return err
+			}
+		}
+	}
 	return resourceOvcMachineRead(d, m)
 }
 
@@ -262,7 +300,74 @@ func resourceOvcMachineUpdate(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
+	if d.HasChange("interfaces") {
+		machineIDInt, err := strconv.Atoi(machineConfig.MachineID)
+		if err != nil {
+			return err
+		}
+		if _, ok := d.GetOk("interfaces"); ok {
+			old, new := d.GetChange("interfaces")
+			oldNics := old.([]interface{})
+			newNics := new.([]interface{})
+			oldNetworks := countAttachedNetworks(oldNics)
+			newNetworks := countAttachedNetworks(newNics)
+
+			for networkID := range oldNetworks {
+				if len(newNetworks[networkID]) == 0 {
+					log.Println("[DEBUG] Detaching from external network")
+					if err = client.Machines.DeleteExternalIP(machineIDInt, networkID, ""); err != nil {
+						return err
+					}
+				}
+			}
+
+			for networkID, ips := range newNetworks {
+				if err != nil {
+					return err
+				}
+				switch diffNet := len(newNetworks[networkID]) - len(oldNetworks[networkID]); {
+				case diffNet > 0:
+					for i := 0; i < diffNet; i++ {
+						// add missing external IPs
+						log.Println("[DEBUG] Attaching to external network")
+						if err := client.Machines.AddExternalIP(machineIDInt, networkID); err != nil {
+							return err
+						}
+					}
+				case diffNet < 0:
+					for i := 0; i > diffNet; i-- {
+						log.Println("[DEBUG] Deleting external IP")
+						if err := client.Machines.DeleteExternalIP(machineIDInt, networkID, ips[0]); err != nil {
+							return err
+						}
+						ips = ips[1:len(ips)]
+					}
+				}
+			}
+		} else {
+			// delete all interfaces
+			log.Println("[DEBUG] Detaching from all external networks")
+			if err := client.Machines.DeleteExternalIP(machineIDInt, 0, ""); err != nil {
+				return err
+			}
+		}
+	}
 	return resourceOvcMachineRead(d, m)
+}
+
+func countAttachedNetworks(nics []interface{}) map[int][]string {
+	attachedNetworks := make(map[int][]string)
+	for _, nicInterface := range nics {
+		var networkID int
+		var networkIP string
+		if nicInterface != nil {
+			nic := nicInterface.(map[string]interface{})
+			networkID = nic["network_id"].(int)
+			networkIP = nic["ip_address"].(string)
+		}
+		attachedNetworks[networkID] = append(attachedNetworks[networkID], networkIP)
+	}
+	return attachedNetworks
 }
 
 func resourceOvcMachineDelete(d *schema.ResourceData, m interface{}) error {
@@ -290,6 +395,23 @@ func flattenDisks(machineInfo *ovc.MachineInfo) []map[string]interface{} {
 			result = append(result, diskinfo)
 		}
 		log.Printf("disks in map: %v", result)
+	}
+	return result
+}
+
+func flattenNics(machineInfo *ovc.MachineInfo) []map[string]interface{} {
+	result := make([]map[string]interface{}, 0, 1)
+	if machineInfo != nil {
+		for _, cp := range machineInfo.Interfaces {
+			if cp.Type == "PUBLIC" {
+				// show only public interfaces
+				nic := make(map[string]interface{})
+				nic["network_id"] = cp.NetworkID
+				nic["ip_address"] = cp.IPAddress
+				result = append(result, nic)
+			}
+		}
+		log.Printf("nics in map: %v", result)
 	}
 	return result
 }

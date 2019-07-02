@@ -42,5 +42,6 @@ lint: fmtcheck
 update_sdk: 
 	GO111MODULE=on go get -u github.com/gig-tech/ovc-sdk-go@$(SDK_BRANCH)
 	GO111MODULE=on go mod vendor
+	GO111MODULE=on go mod tidy
 
 .PHONY: default build install test fmt fmtcheck lint tools

@@ -336,11 +336,13 @@ func resourceOvcMachineUpdate(d *schema.ResourceData, m interface{}) error {
 					}
 				case diffNet < 0:
 					for i := 0; i > diffNet; i-- {
-						log.Println("[DEBUG] Deleting external IP")
-						if err := client.Machines.DeleteExternalIP(machineIDInt, networkID, ips[0]); err != nil {
-							return err
+						if len(ips) > 0 { //this condition added for safety and might be unnecessary
+							log.Println("[DEBUG] Deleting external IP")
+							if err := client.Machines.DeleteExternalIP(machineIDInt, networkID, ips[0]); err != nil {
+								return err
+							}
+							ips = ips[1:len(ips)]
 						}
-						ips = ips[1:len(ips)]
 					}
 				}
 			}

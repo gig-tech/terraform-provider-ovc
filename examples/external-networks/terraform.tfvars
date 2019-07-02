@@ -17,7 +17,7 @@ size_id = 3
 disksize = 10
 
 # external network name
-externa_network = "<External Network Name>"
+external_network = "<External Network Name>"
 
 # The description of the VM
 vm_description = "Managing external networks with Terraform"

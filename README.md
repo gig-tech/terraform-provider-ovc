@@ -63,7 +63,7 @@ Providing `scope=offline_access` will return a JWT that is refreshable.
 ```sh
 CLIENT_ID=<your-client-id>
 CLIENT_SECRET=<your-client-secret>
-TF_VAR_client_jwt=$(curl --silent -d 'grant_type=client_credentials&client_id='"$CLIENT_ID"'&client_secret='"$CLIENT_SECRET"'&response_type=id_token&scope=offline_access' https://itsyou.online/v0/oauth/access_token)
+TF_VAR_client_jwt=$(curl --silent -d 'grant_type=client_credentials&client_id='"$CLIENT_ID"'&client_secret='"$CLIENT_SECRET"'&response_type=id_token&scope=offline_access' https://itsyou.online/v1/oauth/access_token)
 echo $TF_VAR_client_jwt
 ```
 By configuration the following parameters you will configure the ovc provider to authenticate

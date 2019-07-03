@@ -3,6 +3,7 @@ package ovc
 import (
 	"fmt"
 	"log"
+	"net"
 	"strconv"
 
 	"github.com/gig-tech/ovc-sdk-go/ovc"
@@ -98,6 +99,11 @@ func resourceOvcMachine() *schema.Resource {
 			"ip_address": {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			"act_as_default_gateway": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 			"interfaces": {
 				Type:     schema.TypeList,
@@ -233,8 +239,8 @@ func resourceOvcMachineCreate(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
-	// attach to external networks
 	if v, ok := d.GetOk("interfaces"); ok {
+		// attach to external networks
 		nics := v.([]interface{})
 		for _, nici := range nics {
 			var networkID int
@@ -250,6 +256,25 @@ func resourceOvcMachineCreate(d *schema.ResourceData, m interface{}) error {
 			}
 		}
 	}
+	if d.Get("act_as_default_gateway").(bool) {
+		// Get machine private network IP
+		machineInfo, err := client.Machines.Get(machineID)
+		if err != nil {
+			return err
+		}
+		var privateIP string
+		if len(machineInfo.Interfaces) > 0 && machineInfo.Interfaces[0].Type == "bridge" {
+			privateIP = machineInfo.Interfaces[0].IPAddress
+		}
+		if len(privateIP) == 0 {
+			return fmt.Errorf("[ERROR] Cannot set Machine %s as default gateway of Cloudspace %v: the Machine has no private network IP set", machineInfo.Name, machineInfo.CloudspaceID)
+		}
+		// set VM as default gateway of the parent cloudspace
+		if err := client.CloudSpaces.SetDefaultGateway(machineConfig.CloudspaceID, privateIP); err != nil {
+			return err
+		}
+	}
+
 	return resourceOvcMachineRead(d, m)
 }
 
@@ -259,6 +284,10 @@ func resourceOvcMachineUpdate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*ovc.Client)
 	machineConfig := ovc.MachineConfig{}
 	machineConfig.MachineID = d.Id()
+	machineIDInt, err := strconv.Atoi(machineConfig.MachineID)
+	if err != nil {
+		return err
+	}
 	if d.HasChange("name") {
 		machineConfig.Name = d.Get("name").(string)
 	}
@@ -301,10 +330,6 @@ func resourceOvcMachineUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if d.HasChange("interfaces") {
-		machineIDInt, err := strconv.Atoi(machineConfig.MachineID)
-		if err != nil {
-			return err
-		}
 		if _, ok := d.GetOk("interfaces"); ok {
 			old, new := d.GetChange("interfaces")
 			oldNics := old.([]interface{})
@@ -349,10 +374,57 @@ func resourceOvcMachineUpdate(d *schema.ResourceData, m interface{}) error {
 		} else {
 			// delete all interfaces
 			log.Println("[DEBUG] Detaching from all external networks")
-			if err := client.Machines.DeleteExternalIP(machineIDInt, 0, ""); err != nil {
+			var emptyIP string
+			if err := client.Machines.DeleteExternalIP(machineIDInt, 0, emptyIP); err != nil {
 				return err
 			}
 		}
+	}
+	if d.HasChange("act_as_default_gateway") {
+		// get machine info in order to get cloudspace ID
+		machineInfo, err := client.Machines.Get(machineConfig.MachineID)
+		if err != nil {
+			return err
+		}
+		actAsDefaultGateway := d.Get("act_as_default_gateway").(bool)
+		if actAsDefaultGateway {
+			// set VM to act as default cloudspace
+			var privateIP string
+			if len(machineInfo.Interfaces) > 0 && machineInfo.Interfaces[0].Type == "bridge" {
+				privateIP = machineInfo.Interfaces[0].IPAddress
+			}
+			if len(privateIP) == 0 {
+				return fmt.Errorf("[ERROR] Cannot set Machine %s as default gateway of Cloudspace %v: the Machine has no private network IP set", machineInfo.Name, machineInfo.CloudspaceID)
+			}
+			// set VM as default gateway of the parent cloudspace
+			log.Printf("[DEBUG] Make VM(%v) a default gateway of its cloudspace(%v)", machineIDInt, machineInfo.CloudspaceID)
+			if err := client.CloudSpaces.SetDefaultGateway(machineInfo.CloudspaceID, privateIP); err != nil {
+				return err
+			}
+		} else {
+			// reset default gateway to the virtual firewall IP
+			cloudspaceInfo, err := client.CloudSpaces.Get(strconv.Itoa(machineInfo.CloudspaceID))
+			if err != nil {
+				return err
+			}
+			networkIP, _, err := net.ParseCIDR(cloudspaceInfo.PrivateNetwork)
+			if err != nil {
+				return err
+			}
+			networkIP = networkIP.To4()
+			if networkIP == nil {
+				return fmt.Errorf("non ipv4 address %v", networkIP)
+			}
+			networkIP = networkIP.Mask(networkIP.DefaultMask())
+			// increment last octave of the network to get virtual gateway IP
+			// that's how gateway IP is calculated on OVC
+			networkIP[3]++
+			log.Printf("[DEBUG] Reset default gateway of CS (%v) to the virtual gateway IP %v", machineInfo.CloudspaceID, networkIP.String())
+			if err := client.CloudSpaces.SetDefaultGateway(machineInfo.CloudspaceID, networkIP.String()); err != nil {
+				return err
+			}
+		}
+
 	}
 	return resourceOvcMachineRead(d, m)
 }

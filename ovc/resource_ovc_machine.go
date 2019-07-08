@@ -374,8 +374,7 @@ func resourceOvcMachineUpdate(d *schema.ResourceData, m interface{}) error {
 		} else {
 			// delete all interfaces
 			log.Println("[DEBUG] Detaching from all external networks")
-			var emptyIP string
-			if err := client.Machines.DeleteExternalIP(machineIDInt, 0, emptyIP); err != nil {
+			if err := client.Machines.DeleteExternalIP(machineIDInt, 0, ""); err != nil {
 				return err
 			}
 		}
@@ -386,8 +385,7 @@ func resourceOvcMachineUpdate(d *schema.ResourceData, m interface{}) error {
 		if err != nil {
 			return err
 		}
-		actAsDefaultGateway := d.Get("act_as_default_gateway").(bool)
-		if actAsDefaultGateway {
+		if d.Get("act_as_default_gateway").(bool) {
 			// set VM to act as default cloudspace
 			var privateIP string
 			if len(machineInfo.Interfaces) > 0 && machineInfo.Interfaces[0].Type == "bridge" {

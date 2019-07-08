@@ -10,7 +10,7 @@ import (
 type ImageConfig struct {
 	Name      string `json:"name"`
 	URL       string `json:"url"`
-	GID       int    `json:"gid"`
+	GridID    int    `json:"gid"`
 	BootType  string `json:"boottype"`
 	Type      string `json:"imagetype"`
 	Username  string `json:"username"`
@@ -36,7 +36,6 @@ type ImageInfo struct {
 
 // ImageService is an interface for interfacing with the images
 // of the OVC API
-// See: https://ch-lug-dc01-001.gig.tech/system/
 type ImageService interface {
 	Upload(*ImageConfig) error
 	DeleteByID(int) error
@@ -49,8 +48,6 @@ type ImageService interface {
 type ImageServiceOp struct {
 	client *Client
 }
-
-var _ ImageService = &ImageServiceOp{}
 
 // Upload uploads an image to the system API
 func (s *ImageServiceOp) Upload(imageConfig *ImageConfig) error {
@@ -66,6 +63,7 @@ func (s *ImageServiceOp) Upload(imageConfig *ImageConfig) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -83,10 +81,8 @@ func (s *ImageServiceOp) DeleteByID(imageID int) error {
 		return err
 	}
 	_, err = s.client.Do(req)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return err
 }
 
 // DeleteSystemImageByID deletes an existing system image by ID
@@ -104,10 +100,8 @@ func (s *ImageServiceOp) DeleteSystemImageByID(imageID int, reason string) error
 		return err
 	}
 	_, err = s.client.Do(req)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return err
 }
 
 // List all system images
@@ -127,10 +121,11 @@ func (s *ImageServiceOp) List(accountID int) (*ImageList, error) {
 	if err != nil {
 		return nil, err
 	}
-	var images = new(ImageList)
+	images := new(ImageList)
 	err = json.Unmarshal(body, &images)
 	if err != nil {
 		return nil, err
 	}
+
 	return images, nil
 }

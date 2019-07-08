@@ -24,7 +24,6 @@ type IpsecList []struct {
 
 // IpsecService is an interface for interfacing with ipsec
 // endpoints of the OVC API
-// See: https://ch-lug-dc01-001.gig.tech/g8vdc/#/ApiDocs
 type IpsecService interface {
 	Create(*IpsecConfig) (string, error)
 	List(*IpsecConfig) (*IpsecList, error)
@@ -36,8 +35,6 @@ type IpsecService interface {
 type IpsecServiceOp struct {
 	client *Client
 }
-
-var _ IpsecService = &IpsecServiceOp{}
 
 // Create a new ipsec tunnel
 func (s *IpsecServiceOp) Create(ipsecConfig *IpsecConfig) (string, error) {
@@ -53,11 +50,13 @@ func (s *IpsecServiceOp) Create(ipsecConfig *IpsecConfig) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	var result string
+
+	result := ""
 	err = json.Unmarshal(body, &result)
 	if err != nil {
 		return "", err
 	}
+
 	return result, nil
 }
 
@@ -72,10 +71,8 @@ func (s *IpsecServiceOp) Delete(ipsecConfig *IpsecConfig) error {
 		return err
 	}
 	_, err = s.client.Do(req)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return err
 }
 
 // List all ipsec of a cloudspace
@@ -92,10 +89,11 @@ func (s *IpsecServiceOp) List(ipsecConfig *IpsecConfig) (*IpsecList, error) {
 	if err != nil {
 		return nil, err
 	}
-	var ipsecList = new(IpsecList)
+	ipsecList := new(IpsecList)
 	err = json.Unmarshal(body, &ipsecList)
 	if err != nil {
 		return nil, err
 	}
+
 	return ipsecList, nil
 }

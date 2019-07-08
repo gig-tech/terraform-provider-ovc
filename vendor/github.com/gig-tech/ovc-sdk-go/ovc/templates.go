@@ -21,12 +21,9 @@ type TemplateList []struct {
 
 // TemplateService is an interface for interfacing with the Images
 // endpoints of the OVC API
-// See: https://ch-lug-dc01-001.gig.tech/g8vdc/#/ApiDocs
 type TemplateService interface {
 	List(int) (*TemplateList, error)
 }
-
-var _ TemplateService = &TemplateServiceOp{}
 
 // TemplateServiceOp handles communication with the image related methods of the
 // OVC API
@@ -50,10 +47,11 @@ func (s *TemplateServiceOp) List(accountID int) (*TemplateList, error) {
 	if err != nil {
 		return nil, err
 	}
-	var templates = new(TemplateList)
+	templates := new(TemplateList)
 	err = json.Unmarshal(body, &templates)
 	if err != nil {
 		return nil, err
 	}
+
 	return templates, nil
 }

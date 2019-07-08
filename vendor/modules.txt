@@ -48,7 +48,7 @@ github.com/blang/semver
 github.com/davecgh/go-spew/spew
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
 github.com/dgrijalva/jwt-go
-# github.com/gig-tech/ovc-sdk-go v1.0.1-0.20190516084101-2a97d7f7f0d4
+# github.com/gig-tech/ovc-sdk-go v1.3.0
 github.com/gig-tech/ovc-sdk-go/ovc
 # github.com/go-ini/ini v1.25.4
 github.com/go-ini/ini
@@ -131,6 +131,8 @@ github.com/hashicorp/terraform/svchost/auth
 github.com/hashicorp/yamux
 # github.com/jmespath/go-jmespath v0.0.0-20160803190731-bd40a432e4c7
 github.com/jmespath/go-jmespath
+# github.com/konsorten/go-windows-terminal-sequences v1.0.2
+github.com/konsorten/go-windows-terminal-sequences
 # github.com/mattn/go-isatty v0.0.0-20161123143637-30a891c33c7c
 github.com/mattn/go-isatty
 # github.com/mitchellh/cli v0.0.0-20171129193617-33edc47170b5
@@ -156,6 +158,8 @@ github.com/posener/complete
 github.com/posener/complete/cmd/install
 github.com/posener/complete/cmd
 github.com/posener/complete/match
+# github.com/sirupsen/logrus v1.4.2
+github.com/sirupsen/logrus
 # github.com/ulikunitz/xz v0.5.4
 github.com/ulikunitz/xz
 github.com/ulikunitz/xz/internal/xlog
@@ -189,7 +193,7 @@ golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/lex/httplex
 golang.org/x/net/internal/timeseries
-# golang.org/x/sys v0.0.0-20181026203630-95b1ffbd15a5
+# golang.org/x/sys v0.0.0-20190626221950-04f50cda93cb
 golang.org/x/sys/unix
 # golang.org/x/text v0.0.0-20171013141220-c01e4764d870
 golang.org/x/text/unicode/norm

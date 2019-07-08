@@ -38,6 +38,21 @@ func resourceOvcCloudSpace() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"mode": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "public",
+			},
+			"type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "vgw",
+			},
+			"external_network_id": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
 			"allowed_vm_sizes": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -152,6 +167,9 @@ func resourceOvcCloudSpaceCreate(d *schema.ResourceData, m interface{}) error {
 		MaxNetworkPeerTransfer: -1,
 		MaxNumPublicIP:         -1,
 		PrivateNetwork:         d.Get("private_network").(string),
+		Mode:                   d.Get("mode").(string),
+		Type:                   d.Get("type").(string),
+		ExternalnetworkID:      d.Get("external_network_id").(int),
 	}
 	if v, ok := d.GetOk("resource_limits"); ok {
 		rL := v.(map[string]interface{})

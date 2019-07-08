@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	jwtLib "github.com/dgrijalva/jwt-go"
 )
 
@@ -38,7 +40,7 @@ var (
 func init() {
 	err := SetJWTPublicKey(iyoPublicKeyStr)
 	if err != nil {
-		log.Fatalf("failed to parse pub key:%v", err)
+		log.Fatalf("Failed to parse pub key:%v", err)
 	}
 }
 
@@ -55,14 +57,21 @@ func SetJWTPublicKey(key string) error {
 // NewJWT returns a new JWT type
 // supported identity providers:
 // IYO (itsyou.online)
-func NewJWT(jwtStr string, idProvider string) (*JWT, error) {
-	token, err := parseJWT(jwtStr)
+func NewJWT(jwtStr string, idProvider string, logger *logrus.Entry) (*JWT, error) {
+	if logger == nil {
+		log := logrus.New()
+		logger = log.WithField("source", "OpenvCloud client JWT manager")
+	}
+
+	token, err := parseJWT(jwtStr, logger)
 	if err != nil {
 		return nil, err
 	}
 
-	var jwt = &JWT{}
-	jwt.original = token
+	jwt := &JWT{
+		original: token,
+		logger:   logger,
+	}
 
 	switch idProvider {
 	case "IYO":
@@ -71,7 +80,7 @@ func NewJWT(jwtStr string, idProvider string) (*JWT, error) {
 		return nil, fmt.Errorf("unsupported identity provider. Supported providers are: IYO")
 	}
 
-	refreshable, err := isRefreshable(token)
+	refreshable, err := isRefreshable(token, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -82,8 +91,8 @@ func NewJWT(jwtStr string, idProvider string) (*JWT, error) {
 	return jwt, nil
 }
 
-func parseJWT(jwtStr string) (*jwtLib.Token, error) {
-	log.Printf("[DEBUG] parsing JWT")
+func parseJWT(jwtStr string, logger *logrus.Entry) (*jwtLib.Token, error) {
+	logger.Debug("Parsing JWT")
 	parser := new(jwtLib.Parser)
 	parser.SkipClaimsValidation = true
 	return parser.Parse(jwtStr, func(token *jwtLib.Token) (interface{}, error) {
@@ -94,8 +103,8 @@ func parseJWT(jwtStr string) (*jwtLib.Token, error) {
 	})
 }
 
-func isRefreshable(token *jwtLib.Token) (bool, error) {
-	log.Printf("[DEBUG] checking if JWT is refreshable")
+func isRefreshable(token *jwtLib.Token, logger *logrus.Entry) (bool, error) {
+	logger.Debug("Checking if JWT is refreshable")
 	claims, ok := token.Claims.(jwtLib.MapClaims)
 	if !ok {
 		return false, ErrInvalidJWT
@@ -110,18 +119,20 @@ type JWT struct {
 	current     *jwtLib.Token
 	refreshable bool
 	refreshFunc func(jwtStr string) (string, error)
+	logger      *logrus.Entry
 }
 
 // Get returns the JWT
 // If the JWT is expired (or nearly so) and refreshable, a refreshed token is returned
 func (j *JWT) Get() (string, error) {
 	err := j.refresh()
+
 	return j.current.Raw, err
 }
 
 // Claim returns the value of Claim
 func (j *JWT) Claim(key string) (interface{}, error) {
-	log.Printf("[DEBUG] Checking for claim %s", key)
+	j.logger.Debugf("Checking for claim %s", key)
 	token := j.current
 	if token == nil {
 		token = j.original
@@ -142,12 +153,12 @@ func (j *JWT) Claim(key string) (interface{}, error) {
 
 // refresh refreshes the current JWT if expired (or nearly so) and the original JWT is refreshable
 func (j *JWT) refresh() error {
-	log.Printf("[DEBUG] checking to refresh the JWT")
+	j.logger.Debug("Checking to refresh the JWT")
 	if j.current == nil {
 		j.current = j.original
 	}
-	if isExpired(j.current) {
-		log.Printf("[DEBUG] refreshing JWT")
+	if isExpired(j.current, j.logger) {
+		j.logger.Debug("Refreshing JWT")
 		if !j.refreshable {
 			return ErrExpiredJWT
 		}
@@ -156,7 +167,7 @@ func (j *JWT) refresh() error {
 		if err != nil {
 			return fmt.Errorf("Something went wrong refreshing the JWT: %s", err)
 		}
-		newToken, err := parseJWT(newJWTStr)
+		newToken, err := parseJWT(newJWTStr, j.logger)
 		if err != nil {
 			return fmt.Errorf("Something went wrong parsing the refreshed JWT: %s", err)
 		}
@@ -166,10 +177,10 @@ func (j *JWT) refresh() error {
 	return nil
 }
 
-func isExpired(token *jwtLib.Token) bool {
+func isExpired(token *jwtLib.Token, logger *logrus.Entry) bool {
 	exp, err := isExpiredWithErr(token)
 	if err != nil {
-		log.Printf("Something went wrong checking experation of JWT: %s\n", err)
+		logger.Errorf("Something went wrong checking experation of JWT: %s\n", err)
 	}
 
 	return exp

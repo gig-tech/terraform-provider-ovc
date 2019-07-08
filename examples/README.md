@@ -39,3 +39,7 @@ This is an example on how to set up a VM with a boot disk and 2 additional data 
 
 Following parameters need to be configured:
 * `client_jwt`, as environment variable `TF_VAR_client_jwt`. See [Authentication](../README.md#Authentication).
+
+## [external-networks](./external-networks)
+
+This is and example on how to attach/detach a VM to an external network.

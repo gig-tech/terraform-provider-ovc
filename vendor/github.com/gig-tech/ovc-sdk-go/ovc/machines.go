@@ -55,14 +55,14 @@ type MachineConfig struct {
 
 // MachineInfo contains all information related to a cloudspace
 type MachineInfo struct {
-	Cloudspaceid int    `json:"cloudspaceid"`
+	CloudspaceID int    `json:"cloudspaceid"`
 	Status       string `json:"status"`
 	UpdateTime   int    `json:"updateTime"`
 	Hostname     string `json:"hostname"`
 	Locked       bool   `json:"locked"`
 	Name         string `json:"name"`
 	CreationTime int    `json:"creationTime"`
-	Sizeid       int    `json:"sizeid"`
+	SizeID       int    `json:"sizeid"`
 	Disks        []struct {
 		Status  string `json:"status,omitempty"`
 		SizeMax int    `json:"sizeMax,omitempty"`
@@ -98,7 +98,7 @@ type MachineInfo struct {
 		GUID        string `json:"guid"`
 		Type        string `json:"type"`
 	} `json:"interfaces"`
-	Imageid     int         `json:"imageid"`
+	ImageID     int         `json:"imageid"`
 	ID          int         `json:"id"`
 	Memory      int         `json:"memory"`
 	Vcpus       int         `json:"vcpus"`
@@ -107,12 +107,11 @@ type MachineInfo struct {
 
 // MachineService is an interface for interfacing with the Machine
 // endpoints of the OVC API
-// See: https://ch-lug-dc01-001.gig.tech/g8vdc/#/ApiDocs
-//ht: added resize
 type MachineService interface {
 	List(int) (*MachineList, error)
 	Get(string) (*MachineInfo, error)
 	GetByName(string, string) (*MachineInfo, error)
+	GetByReferenceID(string) (*MachineInfo, error)
 	Create(*MachineConfig) (string, error)
 	Update(*MachineConfig) (string, error)
 	Resize(*MachineConfig) (string, error)
@@ -120,6 +119,8 @@ type MachineService interface {
 	DeleteByID(int) error
 	Template(int, string) error
 	Shutdown(int) error
+	AddExternalIP(int, int) error
+	DeleteExternalIP(int, int, string) error
 }
 
 // MachineServiceOp handles communication with the machine related methods of the
@@ -127,8 +128,6 @@ type MachineService interface {
 type MachineServiceOp struct {
 	client *Client
 }
-
-var _ MachineService = &MachineServiceOp{}
 
 // List all machines
 func (s *MachineServiceOp) List(cloudSpaceID int) (*MachineList, error) {
@@ -146,11 +145,12 @@ func (s *MachineServiceOp) List(cloudSpaceID int) (*MachineList, error) {
 	if err != nil {
 		return nil, err
 	}
-	var machines = new(MachineList)
+	machines := new(MachineList)
 	err = json.Unmarshal(body, &machines)
 	if err != nil {
 		return nil, err
 	}
+
 	return machines, nil
 }
 
@@ -170,11 +170,12 @@ func (s *MachineServiceOp) Get(id string) (*MachineInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	var machineInfo = new(MachineInfo)
+	machineInfo := new(MachineInfo)
 	err = json.Unmarshal(body, &machineInfo)
 	if err != nil {
 		return nil, err
 	}
+
 	return machineInfo, nil
 }
 
@@ -193,7 +194,29 @@ func (s *MachineServiceOp) GetByName(name string, cloudspaceID string) (*Machine
 			return s.client.Machines.Get(strconv.Itoa(mc.ID))
 		}
 	}
+
 	return nil, fmt.Errorf("Machine %s not found", name)
+}
+
+// GetByReferenceID gets an individual machine from its reference ID
+func (s *MachineServiceOp) GetByReferenceID(referenceID string) (*MachineInfo, error) {
+	referenceIDMap := make(map[string]interface{})
+	referenceIDMap["referenceId"] = referenceID
+	referenceIDJson, err := json.Marshal(referenceIDMap)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", s.client.ServerURL+"/cloudapi/machines/getByReferenceId", bytes.NewBuffer(referenceIDJson))
+	if err != nil {
+		return nil, err
+	}
+	body, err := s.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.client.Machines.Get(string(body))
 }
 
 // Create a new machine
@@ -210,6 +233,7 @@ func (s *MachineServiceOp) Create(machineConfig *MachineConfig) (string, error) 
 	if err != nil {
 		return "", err
 	}
+
 	return string(body), nil
 }
 
@@ -227,6 +251,7 @@ func (s *MachineServiceOp) Update(machineConfig *MachineConfig) (string, error) 
 	if err != nil {
 		return "", err
 	}
+
 	return string(body), nil
 }
 
@@ -244,6 +269,7 @@ func (s *MachineServiceOp) Resize(machineConfig *MachineConfig) (string, error) 
 	if err != nil {
 		return "", err
 	}
+
 	return string(body), nil
 }
 
@@ -258,10 +284,8 @@ func (s *MachineServiceOp) Delete(machineConfig *MachineConfig) error {
 		return err
 	}
 	_, err = s.client.Do(req)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return err
 }
 
 // DeleteByID deletes an existing machine by ID
@@ -278,10 +302,8 @@ func (s *MachineServiceOp) DeleteByID(machineID int) error {
 		return err
 	}
 	_, err = s.client.Do(req)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return err
 }
 
 // Template creates an image of the existing machine by ID
@@ -298,10 +320,8 @@ func (s *MachineServiceOp) Template(machineID int, templateName string) error {
 		return err
 	}
 	_, err = s.client.Do(req)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return err
 }
 
 // Shutdown shuts a machine down
@@ -318,8 +338,49 @@ func (s *MachineServiceOp) Shutdown(machineID int) error {
 		return err
 	}
 	_, err = s.client.Do(req)
+
+	return err
+}
+
+// AddExternalIP adds external IP
+func (s *MachineServiceOp) AddExternalIP(machineID int, externalNetworkID int) error {
+	machineMap := make(map[string]interface{})
+	machineMap["machineId"] = machineID
+	if externalNetworkID != 0 {
+		machineMap["externalNetworkId"] = externalNetworkID
+	}
+	machineJSON, err := json.Marshal(machineMap)
 	if err != nil {
 		return err
 	}
-	return nil
+	req, err := http.NewRequest("POST", s.client.ServerURL+"/cloudapi/machines/attachExternalNetwork", bytes.NewBuffer(machineJSON))
+	if err != nil {
+		return err
+	}
+	_, err = s.client.Do(req)
+
+	return err
+}
+
+// DeleteExternalIP removes external IP
+func (s *MachineServiceOp) DeleteExternalIP(machineID int, externalNetworkID int, externalNetworkIP string) error {
+	machineMap := make(map[string]interface{})
+	machineMap["machineId"] = machineID
+	if externalNetworkID > 0 {
+		machineMap["externalNetworkId"] = externalNetworkID
+		if len(externalNetworkIP) > 0 {
+			machineMap["externalnetworkip"] = externalNetworkIP
+		}
+	}
+	machineJSON, err := json.Marshal(machineMap)
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequest("POST", s.client.ServerURL+"/cloudapi/machines/detachExternalNetwork", bytes.NewBuffer(machineJSON))
+	if err != nil {
+		return err
+	}
+	_, err = s.client.Do(req)
+
+	return err
 }

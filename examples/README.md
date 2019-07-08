@@ -42,4 +42,8 @@ Following parameters need to be configured:
 
 ## [external-networks](./external-networks)
 
-This is and example on how to attach/detach a VM to an external network.
+This is an example on how to attach/detach a VM to an external network.
+
+## [custom-firewall](./custom-firewall)
+
+This is an example on how to deploy a cloudspace with custom firewall.

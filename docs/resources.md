@@ -47,6 +47,10 @@ The following arguments are supported:
 * iops - (Optional) IOPS limiting of the boot disk
 * name - (Required) Name of the machine
 * description - (Optional) Description of the machine
+* act_as_default_gateway - (Optional, default to false) Set to true if this machine should act as a default gateway of its cloudspace. Note that only one machine on the cloudspace can act as a gateway, if more than a single machine have this flag, each machine will set default gateway to its IP address, which will lead to unexpected behaviour. To reset default gateway to the virtual gateway IP address, set the flag to **false**. In order to set default gateway to a different machine on the cloudspace:
+  * set flag to false on the machine_1 - current gateway
+  * set flag true on the machine_2 that will take over
+  * add dependency to the resource of the machine 2: `depends: [ovc_machine.machine_1]` - this is necessary to sort actions to first reset gateway to default, and then to set new machine to the gateway role.
 
 ## Resource: ovc_disk
 

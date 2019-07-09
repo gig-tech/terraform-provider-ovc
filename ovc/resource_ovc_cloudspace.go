@@ -49,7 +49,7 @@ func resourceOvcCloudSpace() *schema.Resource {
 				Default:  "vgw",
 			},
 			"external_network_id": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
@@ -169,7 +169,7 @@ func resourceOvcCloudSpaceCreate(d *schema.ResourceData, m interface{}) error {
 		PrivateNetwork:         d.Get("private_network").(string),
 		Mode:                   d.Get("mode").(string),
 		Type:                   d.Get("type").(string),
-		ExternalnetworkID:      d.Get("external_network_id").(int),
+		ExternalnetworkID:      d.Get("external_network_id").(string),
 	}
 	if v, ok := d.GetOk("resource_limits"); ok {
 		rL := v.(map[string]interface{})

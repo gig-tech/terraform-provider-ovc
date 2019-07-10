@@ -24,7 +24,7 @@ type CloudSpaceConfig struct {
 	PrivateNetwork         string  `json:"privatenetwork"`
 	Mode                   string  `json:"mode"`
 	Type                   string  `json:"type"`
-	ExternalnetworkID      int     `json:"externalnetworkId"`
+	ExternalnetworkID      string  `json:"externalnetworkId"`
 }
 
 // ResourceLimits contains all information related to resource limits

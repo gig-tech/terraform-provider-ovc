@@ -51,6 +51,14 @@ func dataSourceOvcCloudSpaces() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"mode": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -73,6 +81,8 @@ func dataSourceOvcCloudSpacesRead(d *schema.ResourceData, m interface{}) error {
 		entity["account_id"] = cp.AccountID
 		entity["external_network_ip"] = cp.Externalnetworkip
 		entity["location"] = cp.Location
+		entity["type"] = cp.Type
+		entity["mode"] = cp.Mode
 		entity["description"] = cp.Descr
 		entity["account"] = cp.AccountName
 		entities[i] = entity

@@ -22,6 +22,12 @@ func resourceOvcCloudSpace() *schema.Resource {
 			if diff.Id() != "" && diff.HasChange("private_network") {
 				return fmt.Errorf("Cannot change Private Network on existing cloudspace")
 			}
+			if diff.Id() != "" && diff.HasChange("type") {
+				return fmt.Errorf("Cannot change Type on existing cloudspace")
+			}
+			if diff.Id() != "" && diff.HasChange("mode") {
+				return fmt.Errorf("Cannot change Mode on existing cloudspace")
+			}
 			return nil
 		},
 		Schema: map[string]*schema.Schema{

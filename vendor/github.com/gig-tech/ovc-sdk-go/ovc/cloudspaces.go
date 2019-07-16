@@ -88,6 +88,8 @@ type CloudSpaceList []struct {
 	} `json:"accountAcl"`
 	GridID          int    `json:"gid"`
 	Location        string `json:"location"`
+	Mode            string `json:"mode"`
+	Type            string `json:"type"`
 	Publicipaddress string `json:"publicipaddress"`
 	AccountName     string `json:"accountName"`
 	ID              int    `json:"id"`

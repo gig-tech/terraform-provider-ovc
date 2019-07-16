@@ -50,6 +50,14 @@ func dataSourceOvcCloudSpace() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"mode": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"resource_limits": {
 				Type:     schema.TypeMap,
 				Computed: true,
@@ -115,6 +123,8 @@ func dataSourceOvcCloudSpaceRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("external_network_ip", cloudSpace.Externalnetworkip)
 	d.Set("private_network", cloudSpace.PrivateNetwork)
 	d.Set("location", cloudSpace.Location)
+	d.Set("type", cloudSpace.Type)
+	d.Set("mode", cloudSpace.Mode)
 	d.SetId(strconv.Itoa(cloudSpace.ID))
 	return nil
 

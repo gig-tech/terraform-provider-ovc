@@ -66,11 +66,11 @@ func Provider() *schema.Provider {
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config := ovc.Config{
-		Hostname:     d.Get("server_url").(string) + "/restmachine",
+		URL:          d.Get("server_url").(string),
 		ClientID:     d.Get("client_id").(string),
 		ClientSecret: d.Get("client_secret").(string),
 		JWT:          d.Get("client_jwt").(string),
 	}
 
-	return ovc.NewClient(&config, d.Get("server_url").(string))
+	return ovc.NewClient(&config)
 }

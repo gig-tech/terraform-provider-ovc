@@ -64,6 +64,10 @@ func resourceOvcMachine() *schema.Resource {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
+			"disk_id": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
 			"disksize": {
 				Type:     schema.TypeInt,
 				Required: true,
@@ -274,7 +278,10 @@ func resourceOvcMachineCreate(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
-
+	if v, ok := d.GetOk("disk_id"); ok {
+		// stop and start machine from ISO
+		diskID := v.(int)
+	}
 	return resourceOvcMachineRead(d, m)
 }
 

@@ -48,7 +48,7 @@ github.com/blang/semver
 github.com/davecgh/go-spew/spew
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
 github.com/dgrijalva/jwt-go
-# github.com/gig-tech/ovc-sdk-go v1.4.0
+# github.com/gig-tech/ovc-sdk-go v1.4.1-0.20190904143426-a57250c5d38b
 github.com/gig-tech/ovc-sdk-go/ovc
 # github.com/go-ini/ini v1.25.4
 github.com/go-ini/ini
@@ -193,7 +193,7 @@ golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/lex/httplex
 golang.org/x/net/internal/timeseries
-# golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7
+# golang.org/x/sys v0.0.0-20190904005037-43c01164e931
 golang.org/x/sys/unix
 # golang.org/x/text v0.0.0-20171013141220-c01e4764d870
 golang.org/x/text/unicode/norm

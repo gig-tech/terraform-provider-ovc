@@ -20,9 +20,9 @@ func dataSourceOvcDisk() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"account_id": {
+			"account": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
@@ -35,6 +35,7 @@ func dataSourceOvcDisk() *schema.Resource {
 			"type": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Optional: true,
 			},
 			"size_used": {
 				Type:     schema.TypeInt,
@@ -46,12 +47,20 @@ func dataSourceOvcDisk() *schema.Resource {
 
 func dataSourceOvcDiskRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*ovc.Client)
-	var disk *ovc.DiskInfo
 	var err error
+	var accountID int
+	account := d.Get("account")
+	if account != "" {
+		accountID, err = client.Accounts.GetIDByName(account.(string))
+		if err != nil {
+			return err
+		}
+	}
+	var disk *ovc.DiskInfo
 	if v, ok := d.GetOk("disk_id"); ok {
 		disk, err = client.Disks.Get(v.(string))
 	} else {
-		disk, err = client.Disks.GetByName(d.Get("name").(string), d.Get("account_id").(string))
+		disk, err = client.Disks.GetByName(d.Get("name").(string), accountID, d.Get("type").(string))
 	}
 	if err != nil {
 		return err

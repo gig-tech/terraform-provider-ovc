@@ -89,9 +89,9 @@ type DiskList []struct {
 // endpoints of the OVC API
 type DiskService interface {
 	Resize(*DiskConfig) error
-	List(int) (*DiskList, error)
+	List(int, string) (*DiskList, error)
 	Get(string) (*DiskInfo, error)
-	GetByName(string, string) (*DiskInfo, error)
+	GetByName(string, int, string) (*DiskInfo, error)
 	Create(*DiskConfig) (string, error)
 	CreateAndAttach(*DiskConfig) (string, error)
 	Attach(*DiskAttachConfig) error
@@ -107,9 +107,12 @@ type DiskServiceOp struct {
 }
 
 // List all disks
-func (s *DiskServiceOp) List(accountID int) (*DiskList, error) {
+func (s *DiskServiceOp) List(accountID int, diskType string) (*DiskList, error) {
 	diskMap := make(map[string]interface{})
 	diskMap["accountId"] = accountID
+	if len(diskType) != 0 {
+		diskMap["type"] = diskType
+	}
 	diskJSON, err := json.Marshal(diskMap)
 	if err != nil {
 		return nil, err
@@ -289,12 +292,8 @@ func (s *DiskServiceOp) Get(diskID string) (*DiskInfo, error) {
 }
 
 // GetByName gets a disk by its name
-func (s *DiskServiceOp) GetByName(name string, accountID string) (*DiskInfo, error) {
-	aid, err := strconv.Atoi(accountID)
-	if err != nil {
-		return nil, err
-	}
-	disks, err := s.client.Disks.List(aid)
+func (s *DiskServiceOp) GetByName(name string, accountID int, diskType string) (*DiskInfo, error) {
+	disks, err := s.client.Disks.List(accountID, diskType)
 	if err != nil {
 		return nil, err
 	}

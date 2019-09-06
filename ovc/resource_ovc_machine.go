@@ -64,6 +64,10 @@ func resourceOvcMachine() *schema.Resource {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
+			"disk_id": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
 			"disksize": {
 				Type:     schema.TypeInt,
 				Required: true,
@@ -274,7 +278,11 @@ func resourceOvcMachineCreate(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
-
+	if v, ok := d.GetOk("disk_id"); ok {
+		diskIDInt := v.(int)
+		client.Machines.Stop(machineIDInt, false)
+		client.Machines.Start(machineIDInt, diskIDInt)
+	}
 	return resourceOvcMachineRead(d, m)
 }
 
@@ -422,7 +430,17 @@ func resourceOvcMachineUpdate(d *schema.ResourceData, m interface{}) error {
 				return err
 			}
 		}
+	}
 
+	// if disk_id is set - stop and start the machine from the new ISO
+	// if disk_id is removed or set to 0 - stop and start the machine from the initial image
+	if d.HasChange("disk_id") {
+		var diskIDInt int
+		if v, ok := d.GetOk("disk_id"); ok {
+			diskIDInt = v.(int)
+		}
+		client.Machines.Stop(machineIDInt, false)
+		client.Machines.Start(machineIDInt, diskIDInt)
 	}
 	return resourceOvcMachineRead(d, m)
 }

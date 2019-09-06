@@ -121,8 +121,6 @@ type MachineService interface {
 	Shutdown(int) error
 	AddExternalIP(int, int) error
 	DeleteExternalIP(int, int, string) error
-	Stop(int, bool) error
-	Start(int, int) error
 }
 
 // MachineServiceOp handles communication with the machine related methods of the
@@ -305,42 +303,6 @@ func (s *MachineServiceOp) DeleteByID(machineID int) error {
 	}
 	_, err = s.client.Do(req)
 
-	return err
-}
-
-// Stop stops a machine
-func (s *MachineServiceOp) Stop(machineID int, force bool) error {
-	machineMap := make(map[string]interface{})
-	machineMap["machineId"] = machineID
-	machineMap["stop"] = force
-	machineJSON, err := json.Marshal(machineMap)
-	if err != nil {
-		return err
-	}
-	req, err := http.NewRequest("POST", s.client.ServerURL+"/cloudapi/machines/stop", bytes.NewBuffer(machineJSON))
-	if err != nil {
-		return err
-	}
-	_, err = s.client.Do(req)
-	return err
-}
-
-// Start starts a machine, boots from ISO if diskID is given
-func (s *MachineServiceOp) Start(machineID int, diskID int) error {
-	machineMap := make(map[string]interface{})
-	machineMap["machineId"] = machineID
-	if diskID != 0 {
-		machineMap["diskId"] = diskID
-	}
-	machineJSON, err := json.Marshal(machineMap)
-	if err != nil {
-		return err
-	}
-	req, err := http.NewRequest("POST", s.client.ServerURL+"/cloudapi/machines/start", bytes.NewBuffer(machineJSON))
-	if err != nil {
-		return err
-	}
-	_, err = s.client.Do(req)
 	return err
 }
 

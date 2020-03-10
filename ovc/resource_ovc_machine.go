@@ -6,7 +6,7 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/gig-tech/ovc-sdk-go/ovc"
+	"github.com/gig-tech/ovc-sdk-go/v2/ovc"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 

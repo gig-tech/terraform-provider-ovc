@@ -1,6 +1,6 @@
 module github.com/gig-tech/terraform-provider-ovc
 
-go 1.11
+go 1.13
 
 require (
 	github.com/gig-tech/ovc-sdk-go/v2 v2.0.1

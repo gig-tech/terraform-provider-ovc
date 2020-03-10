@@ -3,7 +3,7 @@ package ovc
 import (
 	"fmt"
 
-	"github.com/gig-tech/ovc-sdk-go/ovc"
+	"github.com/gig-tech/ovc-sdk-go/v2/ovc"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -12,27 +12,28 @@ func resourceIpsec() *schema.Resource {
 		Create: resourceIpsecCreate,
 		Read:   resourceIpsecRead,
 		Delete: resourceIpsecDelete,
+		Update: resourceIpsecUpdate,
 
 		Schema: map[string]*schema.Schema{
 			"cloudspace_id": {
 				Type:     schema.TypeInt,
 				Required: true,
-				ForceNew: true,
+				ForceNew: false,
 			},
 			"remote_public_ip": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
+				ForceNew: false,
 			},
 			"remote_private_network": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
+				ForceNew: false,
 			},
 			"psk": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
+				ForceNew: false,
 				Computed: true,
 			},
 		},
@@ -82,4 +83,8 @@ func resourceIpsecDelete(d *schema.ResourceData, m interface{}) error {
 	ipsecConfig.RemotePrivateNetwork = d.Get("remote_private_network").(string)
 	err := client.Ipsec.Delete(&ipsecConfig)
 	return err
+}
+
+func resourceIpsecUpdate(d *schema.ResourceData, m interface{}) error {
+	return nil
 }

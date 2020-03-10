@@ -3,7 +3,7 @@ package ovc
 import (
 	"strconv"
 
-	"github.com/gig-tech/ovc-sdk-go/ovc"
+	"github.com/gig-tech/ovc-sdk-go/v2/ovc"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -120,6 +120,8 @@ func resourceOvcDiskUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceOvcDiskDelete(d *schema.ResourceData, m interface{}) error {
+	defer ovc.ReleaseLock(d.Get("machine_id").(int))
+	ovc.GetLock(d.Get("machine_id").(int))
 	client := m.(*ovc.Client)
 	diskConfig := ovc.DiskDeleteConfig{}
 	diskID, err := strconv.Atoi(d.Id())
@@ -130,6 +132,5 @@ func resourceOvcDiskDelete(d *schema.ResourceData, m interface{}) error {
 	diskConfig.Detach = true
 	diskConfig.Permanently = true
 	err = client.Disks.Delete(&diskConfig)
-
 	return err
 }

@@ -3,7 +3,7 @@ package ovc
 import (
 	"strconv"
 
-	"github.com/gig-tech/ovc-sdk-go/v2/ovc"
+	"github.com/gig-tech/ovc-sdk-go/v3/ovc"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -26,7 +26,7 @@ func dataSourceOvcCloudSpace() *schema.Resource {
 				Computed: true,
 			},
 			"cloudspace_id": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
 			},
@@ -95,7 +95,7 @@ func dataSourceOvcCloudSpaceRead(d *schema.ResourceData, m interface{}) error {
 	var cloudSpace *ovc.CloudSpace
 	var err error
 	if v, ok := d.GetOk("cloudspace_id"); ok {
-		cloudSpace, err = client.CloudSpaces.Get(v.(string))
+		cloudSpace, err = client.CloudSpaces.Get(v.(int))
 		if err != nil {
 			return err
 		}

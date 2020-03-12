@@ -37,6 +37,11 @@ type DiskAttachConfig struct {
 	MachineID int `json:"machineId"`
 }
 
+// IOTune is used for specifying tuning information
+type IOTune struct {
+	TotalIopsSec int `json:"total_iops_sec"`
+}
+
 // DiskInfo contains all information related to a disk
 type DiskInfo struct {
 	ReferenceID         string        `json:"referenceId"`
@@ -56,24 +61,20 @@ type DiskInfo struct {
 	Status              string        `json:"status"`
 	RealityDeviceNumber int           `json:"realityDeviceNumber"`
 	Passwd              string        `json:"passwd"`
-	Iotune              struct {
-		TotalIopsSec int `json:"total_iops_sec"`
-	} `json:"iotune"`
-	Name    string        `json:"name"`
-	SizeMax int           `json:"sizeMax"`
-	Meta    []interface{} `json:"_meta"`
-	ACL     struct {
-	} `json:"acl"`
-	Iqn           string `json:"iqn"`
-	BootPartition int    `json:"bootPartition"`
-	Login         string `json:"login"`
-	Order         int    `json:"order"`
-	Ckey          string `json:"_ckey"`
+	Iotune              IOTune        `json:"iotune"`
+	Name                string        `json:"name"`
+	SizeMax             int           `json:"sizeMax"`
+	Meta                []interface{} `json:"_meta"`
+	Iqn                 string        `json:"iqn"`
+	BootPartition       int           `json:"bootPartition"`
+	Login               string        `json:"login"`
+	Order               int           `json:"order"`
+	Ckey                string        `json:"_ckey"`
 }
 
-// DiskList is a list of disks
+// Disk is a list of disks
 // Returned when using the List method
-type DiskList []struct {
+type Disk struct {
 	Username    interface{} `json:"username"`
 	Status      string      `json:"status"`
 	Description string      `json:"description"`
@@ -168,11 +169,11 @@ type DiskUnexposeConfig struct {
 // endpoints of the OVC API
 type DiskService interface {
 	Resize(*DiskConfig) error
-	List(int, string) (*DiskList, error)
-	Get(string) (*DiskInfo, error)
+	List(int, string) (*[]Disk, error)
+	Get(int) (*DiskInfo, error)
 	GetByName(string, int, string) (*DiskInfo, error)
-	Create(*DiskConfig) (string, error)
-	CreateAndAttach(*DiskConfig) (string, error)
+	Create(*DiskConfig) (int, error)
+	CreateAndAttach(*DiskConfig) (int, error)
 	Attach(*DiskAttachConfig) error
 	Detach(*DiskAttachConfig) error
 	Update(*DiskConfig) error
@@ -188,7 +189,7 @@ type DiskServiceOp struct {
 }
 
 // List all disks
-func (s *DiskServiceOp) List(accountID int, diskType string) (*DiskList, error) {
+func (s *DiskServiceOp) List(accountID int, diskType string) (*[]Disk, error) {
 	diskMap := make(map[string]interface{})
 	diskMap["accountId"] = accountID
 	if len(diskType) != 0 {
@@ -200,7 +201,7 @@ func (s *DiskServiceOp) List(accountID int, diskType string) (*DiskList, error) 
 		return nil, err
 	}
 
-	disks := new(DiskList)
+	disks := new([]Disk)
 	err = json.Unmarshal(body, &disks)
 	if err != nil {
 		return nil, err
@@ -210,25 +211,23 @@ func (s *DiskServiceOp) List(accountID int, diskType string) (*DiskList, error) 
 }
 
 // CreateAndAttach a new Disk and attaches it to a machine
-func (s *DiskServiceOp) CreateAndAttach(diskConfig *DiskConfig) (string, error) {
+func (s *DiskServiceOp) CreateAndAttach(diskConfig *DiskConfig) (int, error) {
 	defer ReleaseLock(diskConfig.MachineID)
 	GetLock(diskConfig.MachineID)
 	body, err := s.client.Post("/cloudapi/machines/addDisk", *diskConfig, OperationalActionTimeout)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
-
-	return string(body), nil
+	return strconv.Atoi(string(body))
 }
 
 // Create a new Disk
-func (s *DiskServiceOp) Create(diskConfig *DiskConfig) (string, error) {
+func (s *DiskServiceOp) Create(diskConfig *DiskConfig) (int, error) {
 	body, err := s.client.Post("/cloudapi/disks/create", *diskConfig, OperationalActionTimeout)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
-
-	return string(body), nil
+	return strconv.Atoi(string(body))
 }
 
 // Attach attaches an existing disk to a machine
@@ -281,13 +280,9 @@ func (s *DiskServiceOp) Delete(diskConfig *DiskDeleteConfig) error {
 }
 
 // Get individual Disk
-func (s *DiskServiceOp) Get(diskID string) (*DiskInfo, error) {
+func (s *DiskServiceOp) Get(id int) (*DiskInfo, error) {
 	diskIDMap := make(map[string]interface{})
-	diskIDInt, err := strconv.Atoi(diskID)
-	if err != nil {
-		return nil, err
-	}
-	diskIDMap["diskId"] = diskIDInt
+	diskIDMap["diskId"] = id
 
 	body, err := s.client.Post("/cloudapi/disks/get", diskIDMap, ModelActionTimeout)
 	if err != nil {
@@ -308,10 +303,9 @@ func (s *DiskServiceOp) GetByName(name string, accountID int, diskType string) (
 	if err != nil {
 		return nil, err
 	}
-	for _, dk := range *disks {
-		if dk.Name == name {
-			did := strconv.Itoa(dk.ID)
-			return s.client.Disks.Get(did)
+	for _, disk := range *disks {
+		if disk.Name == name {
+			return s.client.Disks.Get(disk.ID)
 		}
 	}
 

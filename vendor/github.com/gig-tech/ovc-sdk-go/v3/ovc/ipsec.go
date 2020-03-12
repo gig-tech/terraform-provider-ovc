@@ -12,9 +12,9 @@ type IpsecConfig struct {
 	PskSecret            string `json:"pskSecret,omitempty"`
 }
 
-// IpsecList is a list of ipsec of a cloudspace
+// IpsecInfo is a list of ipsec of a cloudspace
 // Returned when using the List method
-type IpsecList []struct {
+type IpsecInfo struct {
 	RemoteAddr           string `json:"remoteAddr"`
 	RemotePrivateNetwork string `json:"remoteprivatenetwork"`
 	PSK                  string `json:"psk"`
@@ -24,7 +24,7 @@ type IpsecList []struct {
 // endpoints of the OVC API
 type IpsecService interface {
 	Create(*IpsecConfig) (string, error)
-	List(*IpsecConfig) (*IpsecList, error)
+	List(*IpsecConfig) (*[]IpsecInfo, error)
 	Delete(*IpsecConfig) error
 }
 
@@ -57,12 +57,12 @@ func (s *IpsecServiceOp) Delete(ipsecConfig *IpsecConfig) error {
 }
 
 // List all ipsec of a cloudspace
-func (s *IpsecServiceOp) List(ipsecConfig *IpsecConfig) (*IpsecList, error) {
+func (s *IpsecServiceOp) List(ipsecConfig *IpsecConfig) (*[]IpsecInfo, error) {
 	body, err := s.client.Post("/cloudapi/ipsec/listTunnels", *ipsecConfig, ModelActionTimeout)
 	if err != nil {
 		return nil, err
 	}
-	ipsecList := new(IpsecList)
+	ipsecList := new([]IpsecInfo)
 	err = json.Unmarshal(body, &ipsecList)
 	if err != nil {
 		return nil, err

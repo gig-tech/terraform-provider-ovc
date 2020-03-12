@@ -3,7 +3,7 @@ package ovc
 import (
 	"strconv"
 
-	"github.com/gig-tech/ovc-sdk-go/v2/ovc"
+	"github.com/gig-tech/ovc-sdk-go/v3/ovc"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -79,8 +79,8 @@ func resourcePortForwardingRead(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	for _, pf := range *portForwardingList {
-		publicPort := strconv.Itoa(d.Get("public_port").(int))
-		if pf.PublicPort == publicPort {
+		publicPort := d.Get("public_port").(int)
+		if pf.PublicPort == strconv.Itoa(publicPort) {
 			d.SetId(strconv.Itoa(pf.ID))
 		}
 	}

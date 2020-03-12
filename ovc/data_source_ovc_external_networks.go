@@ -3,7 +3,7 @@ package ovc
 import (
 	"strconv"
 
-	"github.com/gig-tech/ovc-sdk-go/v2/ovc"
+	"github.com/gig-tech/ovc-sdk-go/v3/ovc"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -26,7 +26,7 @@ func dataSourceOvcExternalNetworks() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeInt,
 							Computed: true,
 						},
 						"account_id": {

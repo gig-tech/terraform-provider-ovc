@@ -3,7 +3,7 @@ package ovc
 import (
 	"strconv"
 
-	"github.com/gig-tech/ovc-sdk-go/v2/ovc"
+	"github.com/gig-tech/ovc-sdk-go/v3/ovc"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -13,11 +13,11 @@ func dataSourceOvcPortForwarding() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"machine_id": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Required: true,
 			},
 			"cloudspace_id": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Required: true,
 			},
 			"protocol": {
@@ -54,7 +54,7 @@ func dataSourceOvcPortForwarding() *schema.Resource {
 
 func dataSourceOvcPortForwardingRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*ovc.Client)
-	var list *ovc.PortForwardingList
+	var list *[]ovc.PortForwardingInfo
 	if machineID, ok := d.GetOk("machine_id"); ok {
 		if cloudspaceID, ok := d.GetOk("cloudspace_id"); ok {
 			cID, err := strconv.Atoi(cloudspaceID.(string))

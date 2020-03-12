@@ -6,33 +6,35 @@ import (
 	"strconv"
 )
 
-// MachineList is a list of machines
-// Returned when using the List method
-type MachineList []struct {
+// NIC basic information
+type NIC struct {
 	Status      string `json:"status"`
-	StackID     int    `json:"stackId"`
-	UpdateTime  int    `json:"updateTime"`
+	MacAddress  string `json:"macAddress"`
 	ReferenceID string `json:"referenceId"`
-	Name        string `json:"name"`
-	Nics        []struct {
-		Status      string `json:"status"`
-		MacAddress  string `json:"macAddress"`
-		ReferenceID string `json:"referenceId"`
-		DeviceName  string `json:"deviceName"`
-		Type        string `json:"type"`
-		Params      string `json:"params"`
-		NetworkID   int    `json:"networkId"`
-		GUID        string `json:"guid"`
-		IPAddress   string `json:"ipAddress"`
-	} `json:"nics"`
-	SizeID       int   `json:"sizeId"`
-	Disks        []int `json:"disks"`
-	CreationTime int   `json:"creationTime"`
-	ImageID      int   `json:"imageId"`
-	Storage      int   `json:"storage"`
-	Vcpus        int   `json:"vcpus"`
-	Memory       int   `json:"memory"`
-	ID           int   `json:"id"`
+	DeviceName  string `json:"deviceName"`
+	Type        string `json:"type"`
+	Params      string `json:"params"`
+	NetworkID   int    `json:"networkId"`
+	GUID        string `json:"guid"`
+	IPAddress   string `json:"ipAddress"`
+}
+
+// Machine basic information
+type Machine struct {
+	Status       string `json:"status"`
+	StackID      int    `json:"stackId"`
+	UpdateTime   int    `json:"updateTime"`
+	ReferenceID  string `json:"referenceId"`
+	Name         string `json:"name"`
+	Nics         []NIC  `json:"nics"`
+	SizeID       int    `json:"sizeId"`
+	Disks        []int  `json:"disks"`
+	CreationTime int    `json:"creationTime"`
+	ImageID      int    `json:"imageId"`
+	Storage      int    `json:"storage"`
+	Vcpus        int    `json:"vcpus"`
+	Memory       int    `json:"memory"`
+	ID           int    `json:"id"`
 }
 
 // MachineConfig is used when creating a machine
@@ -65,72 +67,68 @@ type EmptyMachineConfig struct {
 	Userdata     string `json:"userdata,omitempty"`
 }
 
+// ACL basic information
+type ACL struct {
+	Status       string `json:"status"`
+	CanBeDeleted bool   `json:"canBeDeleted"`
+	Right        string `json:"right"`
+	Type         string `json:"type"`
+	UserGroupID  string `json:"userGroupId"`
+}
+
+// MachineDisk basic information
+type MachineDisk struct {
+	Status  string `json:"status,omitempty"`
+	SizeMax int    `json:"sizeMax,omitempty"`
+	Name    string `json:"name,omitempty"`
+	Descr   string `json:"descr,omitempty"`
+	Type    string `json:"type"`
+	ID      int    `json:"id"`
+}
+
+// UserAccount basic information
+type UserAccount struct {
+	GUID     string `json:"guid"`
+	Login    string `json:"login"`
+	Password string `json:"password"`
+}
+
 // MachineInfo contains all information related to a cloudspace
 type MachineInfo struct {
-	CloudspaceID int    `json:"cloudspaceid"`
-	Status       string `json:"status"`
-	UpdateTime   int    `json:"updateTime"`
-	Hostname     string `json:"hostname"`
-	Locked       bool   `json:"locked"`
-	Name         string `json:"name"`
-	CreationTime int    `json:"creationTime"`
-	SizeID       int    `json:"sizeid"`
-	Disks        []struct {
-		Status  string `json:"status,omitempty"`
-		SizeMax int    `json:"sizeMax,omitempty"`
-		Name    string `json:"name,omitempty"`
-		Descr   string `json:"descr,omitempty"`
-		ACL     struct {
-		} `json:"acl"`
-		Type string `json:"type"`
-		ID   int    `json:"id"`
-	} `json:"disks"`
-	Storage int `json:"storage"`
-	ACL     []struct {
-		Status       string `json:"status"`
-		CanBeDeleted bool   `json:"canBeDeleted"`
-		Right        string `json:"right"`
-		Type         string `json:"type"`
-		UserGroupID  string `json:"userGroupId"`
-	} `json:"acl"`
-	OsImage  string `json:"osImage"`
-	Accounts []struct {
-		GUID     string `json:"guid"`
-		Login    string `json:"login"`
-		Password string `json:"password"`
-	} `json:"accounts"`
-	Interfaces []struct {
-		Status      string `json:"status"`
-		MacAddress  string `json:"macAddress"`
-		ReferenceID string `json:"referenceId"`
-		DeviceName  string `json:"deviceName"`
-		IPAddress   string `json:"ipAddress"`
-		Params      string `json:"params"`
-		NetworkID   int    `json:"networkId"`
-		GUID        string `json:"guid"`
-		Type        string `json:"type"`
-	} `json:"interfaces"`
-	ImageID     int         `json:"imageid"`
-	ID          int         `json:"id"`
-	Memory      int         `json:"memory"`
-	Vcpus       int         `json:"vcpus"`
-	Description interface{} `json:"description"`
+	CloudspaceID int           `json:"cloudspaceid"`
+	Status       string        `json:"status"`
+	UpdateTime   int           `json:"updateTime"`
+	Hostname     string        `json:"hostname"`
+	Locked       bool          `json:"locked"`
+	Name         string        `json:"name"`
+	CreationTime int           `json:"creationTime"`
+	SizeID       int           `json:"sizeid"`
+	Disks        []MachineDisk `json:"disks"`
+	Storage      int           `json:"storage"`
+	ACL          []ACL         `json:"acl"`
+	OsImage      string        `json:"osImage"`
+	Accounts     []UserAccount `json:"accounts"`
+	Interfaces   []NIC         `json:"interfaces"`
+	ImageID      int           `json:"imageid"`
+	ID           int           `json:"id"`
+	Memory       int           `json:"memory"`
+	Vcpus        int           `json:"vcpus"`
+	Description  *string       `json:"description"`
 }
 
 // MachineService is an interface for interfacing with the Machine
 // endpoints of the OVC API
 type MachineService interface {
-	List(int) (*MachineList, error)
-	Get(string) (*MachineInfo, error)
-	GetByName(string, string) (*MachineInfo, error)
+	List(int) (*[]Machine, error)
+	Get(int) (*MachineInfo, error)
+	GetByName(string, int) (*MachineInfo, error)
 	GetByReferenceID(string) (*MachineInfo, error)
-	Create(*MachineConfig) (string, error)
-	CreateEmpty(*EmptyMachineConfig) (string, error)
+	Create(*MachineConfig) (int, error)
+	CreateEmpty(*EmptyMachineConfig) (int, error)
 	Update(*MachineConfig) (string, error)
 	Resize(*MachineConfig) (string, error)
-	Delete(*MachineConfig) error
-	DeleteByID(int) error
-	Template(int, string) error
+	Delete(int, bool) error
+	CreateImage(int, string) error
 	Shutdown(int) error
 	AddExternalIP(int, int) error
 	DeleteExternalIP(int, int, string) error
@@ -145,7 +143,7 @@ type MachineServiceOp struct {
 }
 
 // List all machines
-func (s *MachineServiceOp) List(cloudSpaceID int) (*MachineList, error) {
+func (s *MachineServiceOp) List(cloudSpaceID int) (*[]Machine, error) {
 	cloudSpaceIDMap := make(map[string]interface{})
 	cloudSpaceIDMap["cloudspaceId"] = cloudSpaceID
 
@@ -154,7 +152,7 @@ func (s *MachineServiceOp) List(cloudSpaceID int) (*MachineList, error) {
 		return nil, err
 	}
 
-	machines := new(MachineList)
+	machines := new([]Machine)
 	err = json.Unmarshal(body, &machines)
 	if err != nil {
 		return nil, err
@@ -164,13 +162,12 @@ func (s *MachineServiceOp) List(cloudSpaceID int) (*MachineList, error) {
 }
 
 // Get individual machine
-func (s *MachineServiceOp) Get(id string) (*MachineInfo, error) {
+func (s *MachineServiceOp) Get(id int) (*MachineInfo, error) {
+	defer ReleaseLock(id)
+	GetLock(id)
 	machineIDMap := make(map[string]interface{})
 	var err error
-	machineIDMap["machineId"], err = strconv.Atoi(id)
-	if err != nil {
-		return nil, err
-	}
+	machineIDMap["machineId"] = id
 
 	body, err := s.client.Post("/cloudapi/machines/get", machineIDMap, OperationalActionTimeout)
 	if err != nil {
@@ -187,18 +184,14 @@ func (s *MachineServiceOp) Get(id string) (*MachineInfo, error) {
 }
 
 // GetByName gets an individual machine from its name
-func (s *MachineServiceOp) GetByName(name string, cloudspaceID string) (*MachineInfo, error) {
-	cid, err := strconv.Atoi(cloudspaceID)
-	if err != nil {
-		return nil, err
-	}
-	machines, err := s.client.Machines.List(cid)
+func (s *MachineServiceOp) GetByName(name string, cloudspaceID int) (*MachineInfo, error) {
+	machines, err := s.client.Machines.List(cloudspaceID)
 	if err != nil {
 		return nil, err
 	}
 	for _, mc := range *machines {
 		if mc.Name == name {
-			return s.client.Machines.Get(strconv.Itoa(mc.ID))
+			return s.client.Machines.Get(mc.ID)
 		}
 	}
 
@@ -215,27 +208,30 @@ func (s *MachineServiceOp) GetByReferenceID(referenceID string) (*MachineInfo, e
 		return nil, err
 	}
 
-	return s.client.Machines.Get(string(body))
+	machineID, err := strconv.Atoi(string(body))
+	if err != nil {
+		return nil, err
+	}
+
+	return s.client.Machines.Get(machineID)
 }
 
 // Create a new machine
-func (s *MachineServiceOp) Create(machineConfig *MachineConfig) (string, error) {
+func (s *MachineServiceOp) Create(machineConfig *MachineConfig) (int, error) {
 	body, err := s.client.Post("/cloudapi/machines/create", *machineConfig, OperationalActionTimeout)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
-
-	return string(body), nil
+	return strconv.Atoi(string(body))
 }
 
 // CreateEmpty a new "empty" machine (= not based on an existing image)
-func (s *MachineServiceOp) CreateEmpty(emptyMachineConfig *EmptyMachineConfig) (string, error) {
+func (s *MachineServiceOp) CreateEmpty(emptyMachineConfig *EmptyMachineConfig) (int, error) {
 	body, err := s.client.Post("/cloudapi/machines/createEmptyMachine", *emptyMachineConfig, ModelActionTimeout)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
-
-	return string(body), nil
+	return strconv.Atoi(string(body))
 }
 
 // Update an existing machine
@@ -258,26 +254,20 @@ func (s *MachineServiceOp) Resize(machineConfig *MachineConfig) (string, error) 
 	return string(body), nil
 }
 
-// Delete an existing machine
-func (s *MachineServiceOp) Delete(machineConfig *MachineConfig) error {
-	_, err := s.client.Post("/cloudapi/machines/delete", *machineConfig, OperationalActionTimeout)
-	return err
-}
-
-// DeleteByID deletes an existing machine by ID
-func (s *MachineServiceOp) DeleteByID(machineID int) error {
+// Delete deletes an existing machine
+func (s *MachineServiceOp) Delete(id int, permanently bool) error {
 	machineMap := make(map[string]interface{})
-	machineMap["machineId"] = machineID
-	machineMap["permanently"] = true
+	machineMap["machineId"] = id
+	machineMap["permanently"] = permanently
 
 	_, err := s.client.Post("/cloudapi/machines/delete", machineMap, OperationalActionTimeout)
 	return err
 }
 
 // Stop stops a machine
-func (s *MachineServiceOp) Stop(machineID int, force bool) error {
+func (s *MachineServiceOp) Stop(id int, force bool) error {
 	machineMap := make(map[string]interface{})
-	machineMap["machineId"] = machineID
+	machineMap["machineId"] = id
 	machineMap["stop"] = force
 
 	_, err := s.client.Post("/cloudapi/machines/stop", machineMap, OperationalActionTimeout)
@@ -285,9 +275,9 @@ func (s *MachineServiceOp) Stop(machineID int, force bool) error {
 }
 
 // Start starts a machine, boots from ISO if diskID is given
-func (s *MachineServiceOp) Start(machineID int, diskID int) error {
+func (s *MachineServiceOp) Start(id int, diskID int) error {
 	machineMap := make(map[string]interface{})
-	machineMap["machineId"] = machineID
+	machineMap["machineId"] = id
 	if diskID != 0 {
 		machineMap["diskId"] = diskID
 	}
@@ -296,20 +286,20 @@ func (s *MachineServiceOp) Start(machineID int, diskID int) error {
 	return err
 }
 
-// Template creates an image of the existing machine by ID
-func (s *MachineServiceOp) Template(machineID int, templateName string) error {
+// CreateImage creates an image of the existing machine by ID
+func (s *MachineServiceOp) CreateImage(id int, imageName string) error {
 	machineMap := make(map[string]interface{})
-	machineMap["machineId"] = machineID
-	machineMap["templateName"] = templateName
+	machineMap["machineId"] = id
+	machineMap["templateName"] = imageName
 
 	_, err := s.client.Post("/cloudapi/machines/createTemplate", machineMap, DataActionTimeout)
 	return err
 }
 
 // Shutdown shuts a machine down
-func (s *MachineServiceOp) Shutdown(machineID int) error {
+func (s *MachineServiceOp) Shutdown(id int) error {
 	machineMap := make(map[string]interface{})
-	machineMap["machineId"] = machineID
+	machineMap["machineId"] = id
 	machineMap["force"] = false
 
 	_, err := s.client.Post("/cloudapi/machines/stop", machineMap, OperationalActionTimeout)
@@ -317,9 +307,9 @@ func (s *MachineServiceOp) Shutdown(machineID int) error {
 }
 
 // AddExternalIP adds external IP
-func (s *MachineServiceOp) AddExternalIP(machineID int, externalNetworkID int) error {
+func (s *MachineServiceOp) AddExternalIP(id int, externalNetworkID int) error {
 	machineMap := make(map[string]interface{})
-	machineMap["machineId"] = machineID
+	machineMap["machineId"] = id
 	if externalNetworkID != 0 {
 		machineMap["externalNetworkId"] = externalNetworkID
 	}
@@ -328,9 +318,9 @@ func (s *MachineServiceOp) AddExternalIP(machineID int, externalNetworkID int) e
 }
 
 // DeleteExternalIP removes external IP
-func (s *MachineServiceOp) DeleteExternalIP(machineID int, externalNetworkID int, externalNetworkIP string) error {
+func (s *MachineServiceOp) DeleteExternalIP(id int, externalNetworkID int, externalNetworkIP string) error {
 	machineMap := make(map[string]interface{})
-	machineMap["machineId"] = machineID
+	machineMap["machineId"] = id
 	if externalNetworkID > 0 {
 		machineMap["externalNetworkId"] = externalNetworkID
 		if len(externalNetworkIP) > 0 {

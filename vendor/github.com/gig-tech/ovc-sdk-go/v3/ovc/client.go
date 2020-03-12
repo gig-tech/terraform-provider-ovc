@@ -9,10 +9,13 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"github.com/tidwall/limiter"
 )
 
 var (
@@ -58,7 +61,8 @@ type Client struct {
 	ServerURL string
 	Access    string
 
-	logger Logger
+	logger         Logger
+	requestLimiter *limiter.Limiter
 
 	Machines         MachineService
 	CloudSpaces      CloudSpaceService
@@ -75,16 +79,14 @@ type Client struct {
 
 func setupLogger(c *Config) Logger {
 	if c.Logger == nil {
-		log := logrus.New()
+		logger := logrus.New()
 		if c.Verbose {
-			log.SetLevel(logrus.DebugLevel)
+			logger.SetLevel(logrus.DebugLevel)
 		} else {
-			log.SetLevel(logrus.InfoLevel)
+			logger.SetLevel(logrus.InfoLevel)
 		}
-
-		return LogrusAdapter{FieldLogger: log.WithField("source", "OpenvCloud client")}
+		return LogrusAdapter{FieldLogger: logger.WithField("source", "OpenvCloud client")}
 	}
-
 	return c.Logger
 }
 
@@ -131,6 +133,16 @@ func NewClient(c *Config) (*Client, error) {
 
 	client.logger = logger
 
+	requestLimitConfiguration, found := os.LookupEnv("G8_API_CONCURRENT_REQUESTS")
+	limit := 5
+	if found {
+		limit, err = strconv.Atoi(requestLimitConfiguration)
+		if err != nil {
+			return nil, err
+		}
+	}
+	client.requestLimiter = limiter.New(limit)
+
 	client.Machines = &MachineServiceOp{client: client}
 	client.CloudSpaces = &CloudSpaceServiceOp{client: client}
 	client.Accounts = &AccountServiceOp{client: client}
@@ -171,6 +183,8 @@ func (c *Client) async(req *http.Request) ([]byte, error) {
 }
 
 func (c *Client) doHTTPRequest(client *http.Client, method string, url string, body io.Reader) (*http.Response, error) {
+	defer c.requestLimiter.End()
+	c.requestLimiter.Begin()
 	asyncReq, err := http.NewRequest(method, url, body)
 	if err != nil {
 		c.logger.Errorf("Failed to create async request: %s", err)

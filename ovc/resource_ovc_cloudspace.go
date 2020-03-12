@@ -5,7 +5,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/gig-tech/ovc-sdk-go/v2/ovc"
+	"github.com/gig-tech/ovc-sdk-go/v3/ovc"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -55,7 +55,7 @@ func resourceOvcCloudSpace() *schema.Resource {
 				Default:  "vgw",
 			},
 			"external_network_id": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
 			},
@@ -120,36 +120,45 @@ func resourceOvcCloudSpace() *schema.Resource {
 
 func resourceOvcCloudspaceExists(d *schema.ResourceData, m interface{}) (bool, error) {
 	client := m.(*ovc.Client)
-	cloudspace, err := client.CloudSpaces.Get(d.Id())
+	cloudspaceID, err := strconv.Atoi(d.Id())
+	if err != nil {
+		log.Printf("Failed to convert %s into cloudspaceID in resourceOvcCloudspaceExists", d.Id())
+		return false, err
+	}
+	cloudspace, err := client.CloudSpaces.Get(cloudspaceID)
 	if err != nil || cloudspace.Status == "DESTROYED" {
-		return false, nil
+		return false, err
 	}
 	return true, nil
 }
 
 func resourceOvcCloudSpaceRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*ovc.Client)
-	cloudSpaceID := d.Id()
-	cloudSpace, err := client.CloudSpaces.Get(cloudSpaceID)
+	cloudspaceID, err := strconv.Atoi(d.Id())
+	if err != nil {
+		log.Printf("Failed to convert %s into cloudspaceID in resourceOvcCloudSpaceRead", d.Id())
+		return err
+	}
+	cloudspace, err := client.CloudSpaces.Get(cloudspaceID)
 	if err != nil {
 		return err
 	}
-	if cloudSpace.Status == "DESTROYED" {
+	if cloudspace.Status == "DESTROYED" {
 		log.Println("cloudspace destroyed baby")
 		d.SetId("")
 		return nil
 	}
-	d.Set("status", cloudSpace.Status)
+	d.Set("status", cloudspace.Status)
 	rl := make(map[string]interface{})
-	rl["max_memory_capacity"] = cloudSpace.ResourceLimits.CUM
-	rl["max_disk_capacity"] = cloudSpace.ResourceLimits.CUD
-	rl["max_cpu_capacity"] = cloudSpace.ResourceLimits.CUC
-	rl["max_network_peer_transfer"] = cloudSpace.ResourceLimits.CUNP
-	rl["max_num_public_ip"] = cloudSpace.ResourceLimits.CUI
+	rl["max_memory_capacity"] = cloudspace.ResourceLimits.CUM
+	rl["max_disk_capacity"] = cloudspace.ResourceLimits.CUD
+	rl["max_cpu_capacity"] = cloudspace.ResourceLimits.CUC
+	rl["max_network_peer_transfer"] = cloudspace.ResourceLimits.CUNP
+	rl["max_num_public_ip"] = cloudspace.ResourceLimits.CUI
 	d.Set("resource_limits", rl)
-	d.Set("description", cloudSpace.Description)
-	d.Set("external_network_ip", cloudSpace.Externalnetworkip)
-	d.Set("location", cloudSpace.Location)
+	d.Set("description", cloudspace.Description)
+	d.Set("external_network_ip", cloudspace.Externalnetworkip)
+	d.Set("location", cloudspace.Location)
 	return nil
 
 }
@@ -175,7 +184,7 @@ func resourceOvcCloudSpaceCreate(d *schema.ResourceData, m interface{}) error {
 		PrivateNetwork:         d.Get("private_network").(string),
 		Mode:                   d.Get("mode").(string),
 		Type:                   d.Get("type").(string),
-		ExternalnetworkID:      d.Get("external_network_id").(string),
+		ExternalnetworkID:      d.Get("external_network_id").(int),
 	}
 	if v, ok := d.GetOk("resource_limits"); ok {
 		rL := v.(map[string]interface{})
@@ -216,10 +225,10 @@ func resourceOvcCloudSpaceCreate(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 	cloudspaceID, err := client.CloudSpaces.Create(&cloudSpaceConfig)
-	d.SetId(cloudspaceID)
 	if err != nil {
 		return err
 	}
+	d.SetId(strconv.Itoa(cloudspaceID))
 	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		cloudspace, _ := client.CloudSpaces.Get(cloudspaceID)
 

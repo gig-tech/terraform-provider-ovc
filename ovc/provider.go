@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gig-tech/ovc-sdk-go/v2/ovc"
+	"github.com/gig-tech/ovc-sdk-go/v3/ovc"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/sirupsen/logrus"
 )

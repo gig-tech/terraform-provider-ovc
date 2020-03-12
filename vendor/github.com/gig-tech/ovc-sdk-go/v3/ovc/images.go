@@ -16,10 +16,6 @@ type ImageConfig struct {
 	AccountID int    `json:"accountId"`
 }
 
-// ImageList is a list of images
-// Returned when using the List method
-type ImageList []ImageInfo
-
 // ImageInfo contains information about the image returned by API
 type ImageInfo struct {
 	ID          int    `json:"id"`
@@ -36,9 +32,9 @@ type ImageInfo struct {
 // of the OVC API
 type ImageService interface {
 	Upload(*ImageConfig) error
-	DeleteByID(int) error
-	DeleteSystemImageByID(int, string) error
-	List(int) (*ImageList, error)
+	Delete(int) error
+	DeleteSystemImage(int, string) error
+	List(int) (*[]ImageInfo, error)
 }
 
 // ImageServiceOp handles communication with the image related methods of the
@@ -53,20 +49,20 @@ func (s *ImageServiceOp) Upload(imageConfig *ImageConfig) error {
 	return err
 }
 
-// DeleteByID deletes an existing image by ID
-func (s *ImageServiceOp) DeleteByID(imageID int) error {
+// Delete deletes an existing image by ID
+func (s *ImageServiceOp) Delete(id int) error {
 	imageMap := make(map[string]interface{})
-	imageMap["imageId"] = imageID
+	imageMap["imageId"] = id
 	imageMap["permanently"] = true
 
 	_, err := s.client.Post("/cloudapi/images/delete", imageMap, OperationalActionTimeout)
 	return err
 }
 
-// DeleteSystemImageByID deletes an existing system image by ID
-func (s *ImageServiceOp) DeleteSystemImageByID(imageID int, reason string) error {
+// DeleteSystemImage deletes an existing system image by ID
+func (s *ImageServiceOp) DeleteSystemImage(id int, reason string) error {
 	imageMap := make(map[string]interface{})
-	imageMap["imageId"] = imageID
+	imageMap["imageId"] = id
 	imageMap["reason"] = reason
 	imageMap["permanently"] = true
 
@@ -75,7 +71,7 @@ func (s *ImageServiceOp) DeleteSystemImageByID(imageID int, reason string) error
 }
 
 // List all system images
-func (s *ImageServiceOp) List(accountID int) (*ImageList, error) {
+func (s *ImageServiceOp) List(accountID int) (*[]ImageInfo, error) {
 	accountIDMap := make(map[string]interface{})
 	accountIDMap["accountId"] = accountID
 
@@ -83,7 +79,7 @@ func (s *ImageServiceOp) List(accountID int) (*ImageList, error) {
 	if err != nil {
 		return nil, err
 	}
-	images := new(ImageList)
+	images := new([]ImageInfo)
 	err = json.Unmarshal(body, &images)
 	if err != nil {
 		return nil, err

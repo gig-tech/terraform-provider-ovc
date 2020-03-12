@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 )
 
-// TemplateList is a list of templates
+// Template is a list of templates
 // Returned when using the List method
-type TemplateList []struct {
+type Template struct {
 	Username    interface{} `json:"username"`
 	Status      string      `json:"status"`
 	Description string      `json:"description"`
@@ -20,7 +20,7 @@ type TemplateList []struct {
 // TemplateService is an interface for interfacing with the Images
 // endpoints of the OVC API
 type TemplateService interface {
-	List(int) (*TemplateList, error)
+	List(int) (*[]Template, error)
 }
 
 // TemplateServiceOp handles communication with the image related methods of the
@@ -30,7 +30,7 @@ type TemplateServiceOp struct {
 }
 
 // List all images
-func (s *TemplateServiceOp) List(accountID int) (*TemplateList, error) {
+func (s *TemplateServiceOp) List(accountID int) (*[]Template, error) {
 	templateMap := make(map[string]interface{})
 	templateMap["accountId"] = 4
 
@@ -39,7 +39,7 @@ func (s *TemplateServiceOp) List(accountID int) (*TemplateList, error) {
 		return nil, err
 	}
 
-	templates := new(TemplateList)
+	templates := new([]Template)
 	err = json.Unmarshal(body, &templates)
 	if err != nil {
 		return nil, err

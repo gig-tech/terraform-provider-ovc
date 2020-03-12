@@ -5,17 +5,6 @@ import (
 	"errors"
 )
 
-// SizesList is a list of sizes
-// Returned when using the list method
-type SizesList []struct {
-	ID          int    `json:"id"`
-	Vcpus       int    `json:"vcpus"`
-	Disks       []int  `json:"disks"`
-	Name        string `json:"name"`
-	Memory      int    `json:"memory"`
-	Description string `json:"description,omitempty"`
-}
-
 // Size contains all information related to a disk
 type Size struct {
 	ID          int    `json:"id"`
@@ -29,8 +18,8 @@ type Size struct {
 // SizesService is an interface for interfacing with the Sizes
 // endpoints of the OVC API
 type SizesService interface {
-	List(string) (*SizesList, error)
-	GetByVcpusAndMemory(int, int, string) (*Size, error)
+	List(int) (*[]Size, error)
+	GetByVcpusAndMemory(int, int, int) (*Size, error)
 }
 
 // SizesServiceOp handles communication with the size related methods of the
@@ -40,7 +29,7 @@ type SizesServiceOp struct {
 }
 
 // List all sizes
-func (s *SizesServiceOp) List(cloudspaceID string) (*SizesList, error) {
+func (s *SizesServiceOp) List(cloudspaceID int) (*[]Size, error) {
 	sizesMap := make(map[string]interface{})
 	sizesMap["cloudspaceId"] = cloudspaceID
 
@@ -48,7 +37,7 @@ func (s *SizesServiceOp) List(cloudspaceID string) (*SizesList, error) {
 	if err != nil {
 		return nil, err
 	}
-	sizes := new(SizesList)
+	sizes := new([]Size)
 	err = json.Unmarshal(body, &sizes)
 	if err != nil {
 		return nil, err
@@ -58,7 +47,7 @@ func (s *SizesServiceOp) List(cloudspaceID string) (*SizesList, error) {
 }
 
 // GetByVcpusAndMemory gets sizes by vcpus and memory
-func (s *SizesServiceOp) GetByVcpusAndMemory(vcpus int, memory int, cloudspaceID string) (*Size, error) {
+func (s *SizesServiceOp) GetByVcpusAndMemory(vcpus int, memory int, cloudspaceID int) (*Size, error) {
 	sizes, err := s.client.Sizes.List(cloudspaceID)
 	if err != nil {
 		return nil, err

@@ -3,7 +3,7 @@ package ovc
 import (
 	"strconv"
 
-	"github.com/gig-tech/ovc-sdk-go/v2/ovc"
+	"github.com/gig-tech/ovc-sdk-go/v3/ovc"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -58,7 +58,7 @@ func dataSourceOvcDiskRead(d *schema.ResourceData, m interface{}) error {
 	}
 	var disk *ovc.DiskInfo
 	if v, ok := d.GetOk("disk_id"); ok {
-		disk, err = client.Disks.Get(v.(string))
+		disk, err = client.Disks.Get(v.(int))
 	} else {
 		disk, err = client.Disks.GetByName(d.Get("name").(string), accountID, d.Get("type").(string))
 	}

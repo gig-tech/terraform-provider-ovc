@@ -66,8 +66,8 @@ github.com/davecgh/go-spew/spew
 github.com/dgrijalva/jwt-go
 # github.com/fatih/color v1.7.0
 github.com/fatih/color
-# github.com/gig-tech/ovc-sdk-go/v2 v2.0.1
-github.com/gig-tech/ovc-sdk-go/v2/ovc
+# github.com/gig-tech/ovc-sdk-go/v3 v3.0.0
+github.com/gig-tech/ovc-sdk-go/v3/ovc
 # github.com/golang/protobuf v1.3.2
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/protoc-gen-go/descriptor
@@ -224,6 +224,8 @@ github.com/sirupsen/logrus
 # github.com/spf13/afero v1.2.1
 github.com/spf13/afero
 github.com/spf13/afero/mem
+# github.com/tidwall/limiter v0.0.0-20181220020158-fcddc63bb521
+github.com/tidwall/limiter
 # github.com/ulikunitz/xz v0.5.5
 github.com/ulikunitz/xz
 github.com/ulikunitz/xz/internal/hash

@@ -3,7 +3,7 @@ module github.com/gig-tech/terraform-provider-ovc
 go 1.13
 
 require (
-	github.com/gig-tech/ovc-sdk-go/v2 v2.0.1
+	github.com/gig-tech/ovc-sdk-go/v3 v3.0.0
 	github.com/hashicorp/terraform v0.12.21
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/sirupsen/logrus v1.4.2

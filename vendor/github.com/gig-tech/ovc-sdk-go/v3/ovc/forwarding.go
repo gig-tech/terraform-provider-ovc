@@ -22,19 +22,6 @@ type PortForwardingConfig struct {
 	ID               int    `json:"id,omitempty"`
 }
 
-// PortForwardingList is a list of portforwards
-// Returned when using the List method
-type PortForwardingList []struct {
-	Protocol    string `json:"protocol"`
-	LocalPort   string `json:"localPort"`
-	MachineName string `json:"machineName"`
-	PublicIP    string `json:"publicIp"`
-	LocalIP     string `json:"localIp"`
-	MachineID   int    `json:"machineId"`
-	PublicPort  string `json:"publicPort"`
-	ID          int    `json:"id"`
-}
-
 // PortForwardingInfo is returned when using the get method
 type PortForwardingInfo struct {
 	Protocol    string `json:"protocol"`
@@ -51,7 +38,7 @@ type PortForwardingInfo struct {
 // endpoints of the OVC API
 type ForwardingService interface {
 	Create(*PortForwardingConfig) (int, error)
-	List(*PortForwardingConfig) (*PortForwardingList, error)
+	List(*PortForwardingConfig) (*[]PortForwardingInfo, error)
 	Delete(*PortForwardingConfig) error
 	DeleteByPort(int, string, int) error
 	Update(*PortForwardingConfig) error
@@ -115,13 +102,13 @@ func (s *ForwardingServiceOp) Delete(portForwardingConfig *PortForwardingConfig)
 }
 
 // List all portforwards
-func (s *ForwardingServiceOp) List(portForwardingConfig *PortForwardingConfig) (*PortForwardingList, error) {
+func (s *ForwardingServiceOp) List(portForwardingConfig *PortForwardingConfig) (*[]PortForwardingInfo, error) {
 	body, err := s.client.Post("/cloudapi/portforwarding/list", *portForwardingConfig, ModelActionTimeout)
 	if err != nil {
 		return nil, err
 	}
 
-	portForwardingList := new(PortForwardingList)
+	portForwardingList := new([]PortForwardingInfo)
 	err = json.Unmarshal(body, &portForwardingList)
 	if err != nil {
 		return nil, err
@@ -152,7 +139,7 @@ func (s *ForwardingServiceOp) getRandomPublicPort(portForwardingConfig *PortForw
 	return randInt
 }
 
-func (s *ForwardingServiceOp) hasPublicPort(portForwardingConfig *PortForwardingConfig, r int) bool {
+func (s *ForwardingServiceOp) hasPublicPort(portForwardingConfig *PortForwardingConfig, publicPort int) bool {
 	config := &PortForwardingConfig{
 		CloudspaceID: portForwardingConfig.CloudspaceID,
 	}
@@ -161,7 +148,7 @@ func (s *ForwardingServiceOp) hasPublicPort(portForwardingConfig *PortForwarding
 		return false
 	}
 	for _, port := range *list {
-		if port.PublicPort == strconv.Itoa(r) {
+		if port.PublicPort == strconv.Itoa(publicPort) {
 			return true
 		}
 	}

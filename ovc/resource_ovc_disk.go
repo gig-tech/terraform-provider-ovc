@@ -3,7 +3,7 @@ package ovc
 import (
 	"strconv"
 
-	"github.com/gig-tech/ovc-sdk-go/v2/ovc"
+	"github.com/gig-tech/ovc-sdk-go/v3/ovc"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -50,18 +50,24 @@ func resourceOvcDisk() *schema.Resource {
 
 func resourceOvcDiskExists(d *schema.ResourceData, m interface{}) (bool, error) {
 	client := m.(*ovc.Client)
-	disk, err := client.Disks.Get(d.Id())
+	diskID, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return false, nil
+	}
+	disk, err := client.Disks.Get(diskID)
 	if err != nil || disk.Status == "DESTROYED" {
 		return false, nil
 	}
-
 	return true, nil
 }
 
 func resourceOvcDiskRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*ovc.Client)
-	diskID := d.Id()
-	_, err := client.Disks.Get(diskID)
+	diskID, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return nil
+	}
+	_, err = client.Disks.Get(diskID)
 	if err != nil {
 		d.SetId("")
 		return nil
@@ -84,7 +90,7 @@ func resourceOvcDiskCreate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	d.SetId(diskID)
+	d.SetId(strconv.Itoa(diskID))
 
 	return resourceOvcDiskRead(d, m)
 }

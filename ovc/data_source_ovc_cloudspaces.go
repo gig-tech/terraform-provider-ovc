@@ -1,9 +1,7 @@
 package ovc
 
 import (
-	"strconv"
-
-	"github.com/gig-tech/ovc-sdk-go/v2/ovc"
+	"github.com/gig-tech/ovc-sdk-go/v3/ovc"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -31,7 +29,7 @@ func dataSourceOvcCloudSpaces() *schema.Resource {
 							Computed: true,
 						},
 						"cloudspace_id": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeInt,
 							Optional: true,
 							Computed: true,
 						},
@@ -76,7 +74,7 @@ func dataSourceOvcCloudSpacesRead(d *schema.ResourceData, m interface{}) error {
 	for i, cp := range *cloudSpaces {
 		entity := make(map[string]interface{})
 		entity["status"] = cp.Status
-		entity["cloudspace_id"] = strconv.Itoa(cp.ID)
+		entity["cloudspace_id"] = cp.ID
 		entity["name"] = cp.Name
 		entity["account_id"] = cp.AccountID
 		entity["external_network_ip"] = cp.Externalnetworkip

@@ -3,7 +3,7 @@ package ovc
 import (
 	"strconv"
 
-	"github.com/gig-tech/ovc-sdk-go/v2/ovc"
+	"github.com/gig-tech/ovc-sdk-go/v3/ovc"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -13,11 +13,11 @@ func dataSourceOvcMachine() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"machine_id": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 			"cloudspace_id": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Required: true,
 			},
 			"name": {
@@ -129,12 +129,12 @@ func dataSourceOvcMachineRead(d *schema.ResourceData, m interface{}) error {
 	var machine *ovc.MachineInfo
 	var err error
 	if v, ok := d.GetOk("machine_id"); ok {
-		machine, err = client.Machines.Get(v.(string))
+		machine, err = client.Machines.Get(v.(int))
 		if err != nil {
 			return err
 		}
 	} else {
-		machine, err = client.Machines.GetByName(d.Get("name").(string), d.Get("cloudspace_id").(string))
+		machine, err = client.Machines.GetByName(d.Get("name").(string), d.Get("cloudspace_id").(int))
 
 		if err != nil {
 			return err
@@ -144,7 +144,7 @@ func dataSourceOvcMachineRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("status", machine.Status)
 	d.Set("name", machine.Name)
 	d.Set("size_id", machine.SizeID)
-	d.Set("description", machine.Description.(string))
+	d.Set("description", machine.Description)
 	d.Set("update_time", machine.UpdateTime)
 	d.Set("cloudspace_id", strconv.Itoa(machine.CloudspaceID))
 	d.Set("machine_id", machine.ID)

@@ -6,7 +6,7 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/gig-tech/ovc-sdk-go/v2/ovc"
+	"github.com/gig-tech/ovc-sdk-go/v3/ovc"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -168,7 +168,11 @@ func resourceOvcMachine() *schema.Resource {
 
 func resourceOvcMachineExists(d *schema.ResourceData, m interface{}) (bool, error) {
 	client := m.(*ovc.Client)
-	_, err := client.Machines.Get(d.Id())
+	machineID, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return false, nil
+	}
+	_, err = client.Machines.Get(machineID)
 	if err != nil {
 		return false, nil
 	}
@@ -177,7 +181,11 @@ func resourceOvcMachineExists(d *schema.ResourceData, m interface{}) (bool, erro
 
 func resourceOvcMachineRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*ovc.Client)
-	machineInfo, err := client.Machines.Get(d.Id())
+	machineID, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return nil
+	}
+	machineInfo, err := client.Machines.Get(machineID)
 	if err != nil {
 		log.Println("machine not found error")
 		d.SetId("")
@@ -220,13 +228,9 @@ func resourceOvcMachineCreate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	log.Println("[DEBUG] New machine ID: " + machineID)
-	d.SetId(machineID)
-	log.Println("[DEBUG] Resource machine ID: " + d.Id())
-	machineIDInt, err := strconv.Atoi(machineID)
-	if err != nil {
-		return err
-	}
+	log.Printf("[DEBUG] New machine ID: %d\n", machineID)
+	d.SetId(strconv.Itoa(machineID))
+	log.Printf("[DEBUG] Resource machine ID: %s\n", d.Id())
 	// Set IOPS boot disk
 	iops := d.Get("iops")
 	if iops != nil {
@@ -255,7 +259,7 @@ func resourceOvcMachineCreate(d *schema.ResourceData, m interface{}) error {
 					networkID = nic["network_id"].(int)
 				}
 			}
-			if err := client.Machines.AddExternalIP(machineIDInt, networkID); err != nil {
+			if err := client.Machines.AddExternalIP(machineID, networkID); err != nil {
 				return err
 			}
 		}
@@ -280,8 +284,8 @@ func resourceOvcMachineCreate(d *schema.ResourceData, m interface{}) error {
 	}
 	if v, ok := d.GetOk("disk_id"); ok {
 		diskIDInt := v.(int)
-		client.Machines.Stop(machineIDInt, false)
-		client.Machines.Start(machineIDInt, diskIDInt)
+		client.Machines.Stop(machineID, false)
+		client.Machines.Start(machineID, diskIDInt)
 	}
 	return resourceOvcMachineRead(d, m)
 }
@@ -316,7 +320,7 @@ func resourceOvcMachineUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if d.HasChange("iops") || d.HasChange("disksize") {
-		bootDiskID, err := GetBootDiskID(client, d.Id())
+		bootDiskID, err := GetBootDiskID(client, machineIDInt)
 		if err != nil {
 			return err
 		}
@@ -389,7 +393,11 @@ func resourceOvcMachineUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 	if d.HasChange("act_as_default_gateway") {
 		// get machine info in order to get cloudspace ID
-		machineInfo, err := client.Machines.Get(machineConfig.MachineID)
+		machineID, err := strconv.Atoi(machineConfig.MachineID)
+		if err != nil {
+			return err
+		}
+		machineInfo, err := client.Machines.Get(machineID)
 		if err != nil {
 			return err
 		}
@@ -409,7 +417,7 @@ func resourceOvcMachineUpdate(d *schema.ResourceData, m interface{}) error {
 			}
 		} else {
 			// reset default gateway to the virtual firewall IP
-			cloudspaceInfo, err := client.CloudSpaces.Get(strconv.Itoa(machineInfo.CloudspaceID))
+			cloudspaceInfo, err := client.CloudSpaces.Get(machineInfo.CloudspaceID)
 			if err != nil {
 				return err
 			}
@@ -462,11 +470,11 @@ func countAttachedNetworks(nics []interface{}) map[int][]string {
 
 func resourceOvcMachineDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*ovc.Client)
-	machineConfig := ovc.MachineConfig{}
-	machineConfig.MachineID = d.Id()
-	machineConfig.Permanently = true
-	err := client.Machines.Delete(&machineConfig)
-	return err
+	machineID, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return err
+	}
+	return client.Machines.Delete(machineID, true)
 }
 
 func flattenDisks(machineInfo *ovc.MachineInfo) []map[string]interface{} {
@@ -507,7 +515,7 @@ func flattenNics(machineInfo *ovc.MachineInfo) []map[string]interface{} {
 }
 
 // GetBootDiskID gets ID of the boot disk of the machine
-func GetBootDiskID(client *ovc.Client, id string) (int, error) {
+func GetBootDiskID(client *ovc.Client, id int) (int, error) {
 	machineInfo, err := client.Machines.Get(id)
 	if err != nil {
 		return 0, err

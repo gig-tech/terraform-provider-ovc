@@ -22,7 +22,7 @@ type CloudSpaceConfig struct {
 	PrivateNetwork         string  `json:"privatenetwork,omitempty"`
 	Mode                   string  `json:"mode,omitempty"`
 	Type                   string  `json:"type,omitempty"`
-	ExternalnetworkID      string  `json:"externalnetworkId,omitempty"`
+	ExternalnetworkID      int     `json:"externalnetworkId,omitempty"`
 }
 
 // ResourceLimits contains all information related to resource limits
@@ -45,53 +45,34 @@ type CloudSpace struct {
 	AccountID         int            `json:"accountId"`
 	Name              string         `json:"name"`
 	CreationTime      int            `json:"creationTime"`
-	ACL               []struct {
-		Status       string `json:"status"`
-		CanBeDeleted bool   `json:"canBeDeleted"`
-		Right        string `json:"right"`
-		Type         string `json:"type"`
-		UserGroupID  string `json:"userGroupId"`
-	} `json:"acl"`
-	Secret          string `json:"secret"`
-	GridID          int    `json:"gid"`
-	Location        string `json:"location"`
-	Publicipaddress string `json:"publicipaddress"`
-	PrivateNetwork  string `json:"privatenetwork"`
-	Type            string `json:"type"`
-	Mode            string `json:"mode"`
+	ACL               []ACL          `json:"acl"`
+	Secret            string         `json:"secret"`
+	GridID            int            `json:"gid"`
+	Location          string         `json:"location"`
+	Publicipaddress   string         `json:"publicipaddress"`
+	PrivateNetwork    string         `json:"privatenetwork"`
+	Type              string         `json:"type"`
+	Mode              string         `json:"mode"`
 }
 
-// CloudSpaceList returns a list of CloudSpaces
-type CloudSpaceList []struct {
-	Status            string `json:"status"`
-	UpdateTime        int    `json:"updateTime"`
-	Externalnetworkip string `json:"externalnetworkip"`
-	Name              string `json:"name"`
-	Descr             string `json:"descr"`
-	CreationTime      int    `json:"creationTime"`
-	ACL               []struct {
-		Status       string `json:"status"`
-		CanBeDeleted bool   `json:"canBeDeleted"`
-		Right        string `json:"right"`
-		Type         string `json:"type"`
-		UserGroupID  string `json:"userGroupId"`
-	} `json:"acl"`
-	AccountACL struct {
-		Status      string `json:"status"`
-		Right       string `json:"right"`
-		Explicit    bool   `json:"explicit"`
-		UserGroupID string `json:"userGroupId"`
-		GUID        string `json:"guid"`
-		Type        string `json:"type"`
-	} `json:"accountAcl"`
-	GridID          int    `json:"gid"`
-	Location        string `json:"location"`
-	Mode            string `json:"mode"`
-	Type            string `json:"type"`
-	Publicipaddress string `json:"publicipaddress"`
-	AccountName     string `json:"accountName"`
-	ID              int    `json:"id"`
-	AccountID       int    `json:"accountId"`
+// CloudSpaceInfo returns a list of CloudSpaces
+type CloudSpaceInfo struct {
+	Status            string     `json:"status"`
+	UpdateTime        int        `json:"updateTime"`
+	Externalnetworkip string     `json:"externalnetworkip"`
+	Name              string     `json:"name"`
+	Descr             string     `json:"descr"`
+	CreationTime      int        `json:"creationTime"`
+	ACL               []ACL      `json:"acl"`
+	AccountACL        AccountACL `json:"accountAcl"`
+	GridID            int        `json:"gid"`
+	Location          string     `json:"location"`
+	Mode              string     `json:"mode"`
+	Type              string     `json:"type"`
+	Publicipaddress   string     `json:"publicipaddress"`
+	AccountName       string     `json:"accountName"`
+	ID                int        `json:"id"`
+	AccountID         int        `json:"accountId"`
 }
 
 // CloudSpaceDeleteConfig used to delete a CloudSpace
@@ -103,10 +84,10 @@ type CloudSpaceDeleteConfig struct {
 // CloudSpaceService is an interface for interfacing with the CloudSpace
 // endpoints of the OVC API
 type CloudSpaceService interface {
-	List() (*CloudSpaceList, error)
-	Get(string) (*CloudSpace, error)
+	List() (*[]CloudSpaceInfo, error)
+	Get(int) (*CloudSpace, error)
 	GetByNameAndAccount(string, string) (*CloudSpace, error)
-	Create(*CloudSpaceConfig) (string, error)
+	Create(*CloudSpaceConfig) (int, error)
 	Update(*CloudSpaceConfig) error
 	Delete(*CloudSpaceDeleteConfig) error
 	SetDefaultGateway(int, string) error
@@ -119,14 +100,14 @@ type CloudSpaceServiceOp struct {
 }
 
 // List returns all cloudspaces
-func (s *CloudSpaceServiceOp) List() (*CloudSpaceList, error) {
+func (s *CloudSpaceServiceOp) List() (*[]CloudSpaceInfo, error) {
 	cloudSpaceMap := make(map[string]interface{})
 	cloudSpaceMap["includedeleted"] = false
 	body, err := s.client.Post("/cloudapi/cloudspaces/list", cloudSpaceMap, ModelActionTimeout)
 	if err != nil {
 		return nil, err
 	}
-	cloudSpaces := new(CloudSpaceList)
+	cloudSpaces := new([]CloudSpaceInfo)
 	err = json.Unmarshal(body, &cloudSpaces)
 	if err != nil {
 		return nil, err
@@ -136,14 +117,9 @@ func (s *CloudSpaceServiceOp) List() (*CloudSpaceList, error) {
 }
 
 // Get individual CloudSpace
-func (s *CloudSpaceServiceOp) Get(cloudSpaceID string) (*CloudSpace, error) {
+func (s *CloudSpaceServiceOp) Get(id int) (*CloudSpace, error) {
 	cloudSpaceIDMap := make(map[string]interface{})
-
-	cloudSpaceIDInt, err := strconv.Atoi(cloudSpaceID)
-	if err != nil {
-		return nil, err
-	}
-	cloudSpaceIDMap["cloudspaceId"] = cloudSpaceIDInt
+	cloudSpaceIDMap["cloudspaceId"] = id
 
 	body, err := s.client.Post("/cloudapi/cloudspaces/get", cloudSpaceIDMap, ModelActionTimeout)
 	if err != nil {
@@ -152,6 +128,7 @@ func (s *CloudSpaceServiceOp) Get(cloudSpaceID string) (*CloudSpace, error) {
 	cloudSpace := new(CloudSpace)
 	err = json.Unmarshal(body, &cloudSpace)
 	if err != nil {
+		s.client.logger.Debug("Unmarschalling result into cloudspace object failed")
 		return nil, err
 	}
 
@@ -166,8 +143,7 @@ func (s *CloudSpaceServiceOp) GetByNameAndAccount(cloudSpaceName string, account
 	}
 	for _, cp := range *cloudspaces {
 		if cp.AccountName == account && cp.Name == cloudSpaceName {
-			cid := strconv.Itoa(cp.ID)
-			return s.client.CloudSpaces.Get(cid)
+			return s.client.CloudSpaces.Get(cp.ID)
 		}
 	}
 
@@ -175,13 +151,12 @@ func (s *CloudSpaceServiceOp) GetByNameAndAccount(cloudSpaceName string, account
 }
 
 // Create a new CloudSpace
-func (s *CloudSpaceServiceOp) Create(cloudSpaceConfig *CloudSpaceConfig) (string, error) {
+func (s *CloudSpaceServiceOp) Create(cloudSpaceConfig *CloudSpaceConfig) (int, error) {
 	body, err := s.client.Post("/cloudapi/cloudspaces/create", *cloudSpaceConfig, OperationalActionTimeout)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
-
-	return string(body), nil
+	return strconv.Atoi(string(body))
 }
 
 // Delete a CloudSpace
@@ -197,9 +172,9 @@ func (s *CloudSpaceServiceOp) Update(cloudSpaceConfig *CloudSpaceConfig) error {
 }
 
 // SetDefaultGateway sets default gateway of the cloudspace to the given IP address
-func (s *CloudSpaceServiceOp) SetDefaultGateway(cloudspaceID int, gateway string) error {
+func (s *CloudSpaceServiceOp) SetDefaultGateway(id int, gateway string) error {
 	csMap := make(map[string]interface{})
-	csMap["cloudspaceId"] = cloudspaceID
+	csMap["cloudspaceId"] = id
 	csMap["gateway"] = gateway
 
 	_, err := s.client.Post("/cloudapi/cloudspaces/setDefaultGateway", csMap, OperationalActionTimeout)
